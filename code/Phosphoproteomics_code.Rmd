@@ -2,11 +2,42 @@
 title: "Phosphoproteomics"
 output: html_notebook
 ---
-
-Setting working directory and loading data
-```{r}
-plot(cars)
+Download raw data
+```{bash}
+rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
+
+Setting working directory and libraries
+```{r}
+setwd("~/phosphoproteomics_project")
+RequiredPackages <- c() #yet empty
+for (i in RequiredPackages) { #Installs packages if not yet installed
+    if (!require(i, character.only = TRUE)) install.packages(i)
+}
+```
+
+Load raw data and change default separator to ";"
+```{r}
+raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
+raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
+```
+If loop to omit na.value from all Abundance columns
+```{r}
+Abundance_columns <- grep("Abundance", colnames(raw_data_phospho) )
+for (i in Abundance_columns) {
+  data_phospho <- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
+  }
+
+ 
+```
+
+Calculate first values
+```{r}
+
+raw_data_phospho$Abudance.Mean.Control <- row.Mean(raw_data_phospho[,c(10:12)])
+```
+
+
 
 Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
 

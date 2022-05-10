@@ -1768,12 +1768,56 @@ pre code {
 
 
 <!-- rnb-text-begin -->
-<p>Setting working directory and loading data</p>
+<p>Download raw data</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucGxvdChjYXJzKVxuYGBgIn0= -->
-<pre class="r"><code>plot(cars)</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgYmFzaFxucnN5bmMgLXIgbm9haGVAcmFja2hhbS51cHBtYXgudXUuc2U6L3Byb2ovZzIwMjAwMDQvcHJpdmF0ZS9zdHVkZW50X3Byb2plY3RzL3Bob3NwaG9wcm90ZW9taWNzIC9ob21lL25vYWgvcGhvc3Bob3Byb3Rlb21pY3NfcHJvamVjdC9cbmBgYCJ9 -->
+<pre class="bash"><code>rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/</code></pre>
 <!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Setting working directory and libraries</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJ+L3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3RcIilcbmBgYCJ9 -->
+<pre class="r"><code>setwd(&quot;~/phosphoproteomics_project&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogVGhlIHdvcmtpbmcgZGlyZWN0b3J5IHdhcyBjaGFuZ2VkIHRvIC9ob21lL25vYWgvcGhvc3Bob3Byb3Rlb21pY3NfcHJvamVjdCBpbnNpZGUgYSBub3RlYm9vayBjaHVuay4gVGhlIHdvcmtpbmcgZGlyZWN0b3J5IHdpbGwgYmUgcmVzZXQgd2hlbiB0aGUgY2h1bmsgaXMgZmluaXNoZWQgcnVubmluZy4gVXNlIHRoZSBrbml0ciByb290LmRpciBvcHRpb24gaW4gdGhlIHNldHVwIGNodW5rIHRvIGNoYW5nZSB0aGUgd29ya2luZyBkaXJlY3RvcnkgZm9yIG5vdGVib29rIGNodW5rcy5cbiJ9 -->
+<pre><code>Warning: The working directory was changed to /home/noah/phosphoproteomics_project inside a notebook chunk. The working directory will be reset when the chunk is finished running. Use the knitr root.dir option in the setup chunk to change the working directory for notebook chunks.</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eVxuZm9yIChpIGluIFJlcXVpcmVkUGFja2FnZXMpIHsgI0luc3RhbGxzIHBhY2thZ2VzIGlmIG5vdCB5ZXQgaW5zdGFsbGVkXG4gICAgaWYgKCFyZXF1aXJlKGksIGNoYXJhY3Rlci5vbmx5ID0gVFJVRSkpIGluc3RhbGwucGFja2FnZXMoaSlcbn1cbmBgYCJ9 -->
+<pre class="r"><code>RequiredPackages &lt;- c() #yet empty
+for (i in RequiredPackages) { #Installs packages if not yet installed
+    if (!require(i, character.only = TRUE)) install.packages(i)
+}</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Load raw data and change default separator to “;”</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmF3X2RhdGFfcGhvc3BobyA8LSByZWFkLmNzdihmaWxlID0gXCIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9QaG9zcGhvLmNzdlwiLCBzZXAgPSBcIjtcIilcbnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9IFwiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUHJvdGVvbWUuY3N2XCIsIHNlcCA9IFwiO1wiKVxuYGBgIn0= -->
+<pre class="r"><code>raw_data_phospho &lt;- read.csv(file = &quot;/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv&quot;, sep = &quot;;&quot;)
+raw_data_proteom &lt;- read.csv(file = &quot;/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv&quot;, sep = &quot;;&quot;)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>If loop to omit na.value from all Abundance columns</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZVwiLCBjb2xuYW1lcyhyYXdfZGF0YV9waG9zcGhvKSApXG5mb3IgKGkgaW4gQWJ1bmRhbmNlX2NvbHVtbnMpIHtcbiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdXG4gIH1cblxuIFxuYGBgIn0= -->
+<pre class="r"><code>Abundance_columns &lt;- grep(&quot;Abundance&quot;, colnames(raw_data_phospho) )
+for (i in Abundance_columns) {
+  data_phospho &lt;- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
+  }
+
+ </code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>Calculate first values</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
@@ -1787,7 +1831,7 @@ run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KClNldHRpbmcgd29ya2luZyBkaXJlY3RvcnkgYW5kIGxvYWRpbmcgZGF0YQpgYGB7cn0KcGxvdChjYXJzKQpgYGAKCkFkZCBhIG5ldyBjaHVuayBieSBjbGlja2luZyB0aGUgKkluc2VydCBDaHVuayogYnV0dG9uIG9uIHRoZSB0b29sYmFyIG9yIGJ5IHByZXNzaW5nICpDdHJsK0FsdCtJKi4KCldoZW4geW91IHNhdmUgdGhlIG5vdGVib29rLCBhbiBIVE1MIGZpbGUgY29udGFpbmluZyB0aGUgY29kZSBhbmQgb3V0cHV0IHdpbGwgYmUgc2F2ZWQgYWxvbmdzaWRlIGl0IChjbGljayB0aGUgKlByZXZpZXcqIGJ1dHRvbiBvciBwcmVzcyAqQ3RybCtTaGlmdCtLKiB0byBwcmV2aWV3IHRoZSBIVE1MIGZpbGUpLgoKVGhlIHByZXZpZXcgc2hvd3MgeW91IGEgcmVuZGVyZWQgSFRNTCBjb3B5IG9mIHRoZSBjb250ZW50cyBvZiB0aGUgZWRpdG9yLiBDb25zZXF1ZW50bHksIHVubGlrZSAqS25pdCosICpQcmV2aWV3KiBkb2VzIG5vdCBydW4gYW55IFIgY29kZSBjaHVua3MuIEluc3RlYWQsIHRoZSBvdXRwdXQgb2YgdGhlIGNodW5rIHdoZW4gaXQgd2FzIGxhc3QgcnVuIGluIHRoZSBlZGl0b3IgaXMgZGlzcGxheWVkLgo=</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KRG93bmxvYWQgcmF3IGRhdGEKYGBge2Jhc2h9CnJzeW5jIC1yIG5vYWhlQHJhY2toYW0udXBwbWF4LnV1LnNlOi9wcm9qL2cyMDIwMDA0L3ByaXZhdGUvc3R1ZGVudF9wcm9qZWN0cy9waG9zcGhvcHJvdGVvbWljcyAvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvCmBgYAoKU2V0dGluZyB3b3JraW5nIGRpcmVjdG9yeSBhbmQgbGlicmFyaWVzCmBgYHtyfQpzZXR3ZCgifi9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0IikKUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eQpmb3IgKGkgaW4gUmVxdWlyZWRQYWNrYWdlcykgeyAjSW5zdGFsbHMgcGFja2FnZXMgaWYgbm90IHlldCBpbnN0YWxsZWQKICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpCn0KYGBgCgpMb2FkIHJhdyBkYXRhIGFuZCBjaGFuZ2UgZGVmYXVsdCBzZXBhcmF0b3IgdG8gIjsiCmBgYHtyfQpyYXdfZGF0YV9waG9zcGhvIDwtIHJlYWQuY3N2KGZpbGUgPSAiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUGhvc3Boby5jc3YiLCBzZXAgPSAiOyIpCnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9ICIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9Qcm90ZW9tZS5jc3YiLCBzZXAgPSAiOyIpCmBgYApJZiBsb29wIHRvIG9taXQgbmEudmFsdWUgZnJvbSBhbGwgQWJ1bmRhbmNlIGNvbHVtbnMKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZSIsIGNvbG5hbWVzKHJhd19kYXRhX3Bob3NwaG8pICkKZm9yIChpIGluIEFidW5kYW5jZV9jb2x1bW5zKSB7CiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdCiAgfQoKIApgYGAKCkNhbGN1bGF0ZSBmaXJzdCB2YWx1ZXMKYGBge3J9CgpyYXdfZGF0YV9waG9zcGhvJEFidWRhbmNlLk1lYW4uQ29udHJvbCA8LSByb3cuTWVhbihyYXdfZGF0YV9waG9zcGhvWyxjKDEwOjEyKV0pCmBgYAoKCgpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouCgpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkN0cmwrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4KClRoZSBwcmV2aWV3IHNob3dzIHlvdSBhIHJlbmRlcmVkIEhUTUwgY29weSBvZiB0aGUgY29udGVudHMgb2YgdGhlIGVkaXRvci4gQ29uc2VxdWVudGx5LCB1bmxpa2UgKktuaXQqLCAqUHJldmlldyogZG9lcyBub3QgcnVuIGFueSBSIGNvZGUgY2h1bmtzLiBJbnN0ZWFkLCB0aGUgb3V0cHV0IG9mIHRoZSBjaHVuayB3aGVuIGl0IHdhcyBsYXN0IHJ1biBpbiB0aGUgZWRpdG9yIGlzIGRpc3BsYXllZC4K</div>
 
 
 
