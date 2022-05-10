@@ -26,8 +26,7 @@ raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosph
 #### If loop to omit na.value from all Abundance columns. 
 - grep line selects all columns that contain the string "Abundance" and saves the column number in *Abundance_columns*
 - The for loop then selects all row were there is *no* NA value in one of the Abundance columns and copies them to data_phospho to leave the raw data untouched.
-- **!(is.na(raw_data_phospho[,i]))** gives out all the rows that don't have an NA value, these get selected.
-
+- **!(is.na(raw_data_phospho[,i]))** gives out all the rows that don't have an NA value, these get selected
 ```{r}
 Abundance_columns <- grep("Abundance", colnames(raw_data_phospho) )
 for (i in Abundance_columns) {
@@ -60,9 +59,9 @@ for (row in 1:nrow(data_phospho)) {
   i = 1+i
 }
 ```
-#### Cleaning and filtering the dataset
+#### Subsetting data_phospho for ratio values >= 2
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 ```{r}
-#empty
+more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
 ```
 
