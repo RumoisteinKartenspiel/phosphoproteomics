@@ -1,13 +1,15 @@
 ---
 title: "Phosphoproteomics"
 output: html_notebook
+
 ---
-Download raw data
+***
+#### Download raw data from Uppmax
 ```{bash}
 rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 
-Setting working directory and libraries
+#### Setting working directory and libraries
 ```{r}
 setwd("~/phosphoproteomics_project")
 RequiredPackages <- c() #yet empty
@@ -16,12 +18,16 @@ for (i in RequiredPackages) { #Installs packages if not yet installed
 }
 ```
 
-Load raw data and change default separator to ";"
+#### Load raw data and change default separator to ";"
 ```{r}
 raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
 raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
 ```
-If loop to omit na.value from all Abundance columns
+#### If loop to omit na.value from all Abundance columns. 
+- grep line selects all columns that contain the string "Abundance" and saves the column number in *Abundance_columns*
+- The for loop then selects all row were there is *no* NA value in one of the Abundance columns and copies them to data_phospho to leave the raw data untouched.
+- **!(is.na(raw_data_phospho[,i]))** gives out all the rows that don't have an NA value, these get selected.
+
 ```{r}
 Abundance_columns <- grep("Abundance", colnames(raw_data_phospho) )
 for (i in Abundance_columns) {
@@ -29,7 +35,10 @@ for (i in Abundance_columns) {
   }
 ```
 
-Calculate Mean for Abundance and adding it as column and Ratio LIF/Control
+#### Calculate Mean for Abundance and adding it as column and Ratio LIF/Control
+- grep again Abundance but this time the Control and LIF (case) seperatly. 
+- calculate row means each and the ration between the means.
+
 ```{r}
 Abundance_columns <- grep("Abundance.Control", colnames(data_phospho))
 data_phospho$Abudance.Mean.Control <- rowMeans(data_phospho[,c(Abundance_columns)])
@@ -38,7 +47,8 @@ data_phospho$Abudance.Mean.LIF <- rowMeans(data_phospho[,c(Abundance_columns)])
 data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control
 ```
 
-Calculate p-values
+#### Calculate p-values
+- *t.test* to compare all 3 Control <-> 3 Case values. If they are different then the pvalue < 0.05 **->** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value ~ 0.7 (really bad) also indicating no difference.
 ```{r}
 hist(data_phospho$Abudance.Ratio)
 i = 1
@@ -50,11 +60,9 @@ for (row in 1:nrow(data_phospho)) {
   i = 1+i
 }
 ```
+#### Cleaning and filtering the dataset
+- a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
+```{r}
+#empty
+```
 
-
-
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Ctrl+Alt+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Ctrl+Shift+K* to preview the HTML file).
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.

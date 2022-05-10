@@ -1768,7 +1768,9 @@ pre code {
 
 
 <!-- rnb-text-begin -->
-<p>Download raw data</p>
+<hr />
+<div id="download-raw-data-from-uppmax" class="section level4">
+<h4>Download raw data from Uppmax</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgYmFzaFxucnN5bmMgLXIgbm9haGVAcmFja2hhbS51cHBtYXgudXUuc2U6L3Byb2ovZzIwMjAwMDQvcHJpdmF0ZS9zdHVkZW50X3Byb2plY3RzL3Bob3NwaG9wcm90ZW9taWNzIC9ob21lL25vYWgvcGhvc3Bob3Byb3Rlb21pY3NfcHJvamVjdC9cbmBgYCJ9 -->
@@ -1776,7 +1778,9 @@ pre code {
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Setting working directory and libraries</p>
+</div>
+<div id="setting-working-directory-and-libraries" class="section level4">
+<h4>Setting working directory and libraries</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJ+L3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3RcIilcblJlcXVpcmVkUGFja2FnZXMgPC0gYygpICN5ZXQgZW1wdHlcbmZvciAoaSBpbiBSZXF1aXJlZFBhY2thZ2VzKSB7ICNJbnN0YWxscyBwYWNrYWdlcyBpZiBub3QgeWV0IGluc3RhbGxlZFxuICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpXG59XG5gYGAifQ== -->
@@ -1788,7 +1792,9 @@ for (i in RequiredPackages) { #Installs packages if not yet installed
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Load raw data and change default separator to “;”</p>
+</div>
+<div id="load-raw-data-and-change-default-separator-to" class="section level4">
+<h4>Load raw data and change default separator to “;”</h4>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmF3X2RhdGFfcGhvc3BobyA8LSByZWFkLmNzdihmaWxlID0gXCIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9QaG9zcGhvLmNzdlwiLCBzZXAgPSBcIjtcIilcbnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9IFwiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUHJvdGVvbWUuY3N2XCIsIHNlcCA9IFwiO1wiKVxuYGBgIn0= -->
@@ -1797,19 +1803,31 @@ raw_data_proteom &lt;- read.csv(file = &quot;/home/noah/phosphoproteomics_projec
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>If loop to omit na.value from all Abundance columns</p>
+</div>
+<div id="if-loop-to-omit-na.value-from-all-abundance-columns." class="section level4">
+<h4>If loop to omit na.value from all Abundance columns.</h4>
+<ul>
+<li>grep line selects all columns that contain the string “Abundance”
+and saves the column number in <em>Abundance_columns</em></li>
+<li>The for loop then selects all row were there is <em>no</em> NA value
+in one of the Abundance columns and copies them to data_phospho to leave
+the raw data untouched.</li>
+<li><strong>!(is.na(raw_data_phospho[,i]))</strong> gives out all the
+rows that don’t have an NA value, these get selected.</li>
+</ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZVwiLCBjb2xuYW1lcyhyYXdfZGF0YV9waG9zcGhvKSApXG5mb3IgKGkgaW4gQWJ1bmRhbmNlX2NvbHVtbnMpIHtcbiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdXG4gIH1cbmBgYCJ9 -->
-<pre class="r"><code>Abundance_columns &lt;- grep(&quot;Abundance&quot;, colnames(raw_data_phospho) )
-for (i in Abundance_columns) {
-  data_phospho &lt;- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
-  }</code></pre>
-<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Calculate Mean for Abundance and adding it as column and Ratio
-LIF/Control</p>
+</div>
+<div id="calculate-mean-for-abundance-and-adding-it-as-column-and-ratio-lifcontrol" class="section level4">
+<h4>Calculate Mean for Abundance and adding it as column and Ratio
+LIF/Control</h4>
+<ul>
+<li>grep again Abundance but this time the Control and LIF (case)
+seperatly.</li>
+<li>calculate row means each and the ration between the means.</li>
+</ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZS5Db250cm9sXCIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpXG5kYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sIDwtIHJvd01lYW5zKGRhdGFfcGhvc3Bob1ssYyhBYnVuZGFuY2VfY29sdW1ucyldKVxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZS5MSUZcIiwgY29sbmFtZXMoZGF0YV9waG9zcGhvKSlcbmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkxJRiA8LSByb3dNZWFucyhkYXRhX3Bob3NwaG9bLGMoQWJ1bmRhbmNlX2NvbHVtbnMpXSlcbmRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbyA8LSBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgLyBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sXG5gYGAifQ== -->
@@ -1821,7 +1839,18 @@ data_phospho$Abudance.Ratio &lt;- data_phospho$Abudance.Mean.LIF / data_phospho$
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Calculate p-values</p>
+</div>
+<div id="calculate-p-values" class="section level4">
+<h4>Calculate p-values</h4>
+<ul>
+<li><em>t.test</em> to compare all 3 Control &lt;-&gt; 3 Case values. If
+they are different then the pvalue &lt; 0.05 <strong>-&gt;</strong>
+indicating a real differences between case &amp; control. If p-value is
+big the difference is by chance😄 I tried it for row 188 which has a
+Ration nearly equal to 1 (1.02…) indicating no difference in case
+vs. control and the p value ~ 0.7 (really bad) also indicating no
+difference.</li>
+</ul>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
 <!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGlzdChkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuUmF0aW8pXG5pID0gMVxuZm9yIChyb3cgaW4gMTpucm93KGRhdGFfcGhvc3BobykpIHtcbiAgcF92YWx1ZSA8LSB0LnRlc3QoZGF0YV9waG9zcGhvW2ksMTA6MTJdLCBkYXRhX3Bob3NwaG9baSwxMzoxNV0pIFxuICAjdGVzdHMgaWYgbWVhbiBvZiBjb250cm9sIGlzIGRpZmZlcmVudCBmcm9tIG1lYW4gb2YgTElGIChjYXNlKSBhbmQgYXNzaWducyBpdCB0byBsaXN0IHBfdmFsdWVcbiAgZGF0YV9waG9zcGhvJEFidWRhbmNlLnB2YWx1ZVtpXSA8LSBwX3ZhbHVlJHAudmFsdWUgXG4gICNzZWxlY3RzIHAudmFsdWUgZnJvbSBsaXN0IGFuZCBhc3NpZ25zIGl0IHRvIG5ldyBjb2x1bW5cIkFidWRhbmNlLnB2YWx1ZVwiIGluIHRoZSBjb3JyZWN0IHJvd1xuICBpID0gMStpXG59XG5gYGAifQ== -->
@@ -1837,18 +1866,27 @@ for (row in 1:nrow(data_phospho)) {
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
-<p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
-toolbar or by pressing <em>Ctrl+Alt+I</em>.</p>
-<p>When you save the notebook, an HTML file containing the code and
-output will be saved alongside it (click the <em>Preview</em> button or
-press <em>Ctrl+Shift+K</em> to preview the HTML file).</p>
-<p>The preview shows you a rendered HTML copy of the contents of the
-editor. Consequently, unlike <em>Knit</em>, <em>Preview</em> does not
-run any R code chunks. Instead, the output of the chunk when it was last
-run in the editor is displayed.</p>
+</div>
+<div id="cleaning-and-filtering-the-dataset" class="section level4">
+<h4>Cleaning and filtering the dataset</h4>
+<ul>
+<li><ol style="list-style-type: lower-alpha">
+<li>Remove peptides without quantitative values -&gt; Already done in
+“If loop to omit na.value from all Abundance columns” thereby creating
+the data_phospho</li>
+</ol></li>
+</ul>
 <!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuI2VtcHR5XG5gYGAifQ== -->
+<pre class="r"><code>#empty</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+</div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KRG93bmxvYWQgcmF3IGRhdGEKYGBge2Jhc2h9CnJzeW5jIC1yIG5vYWhlQHJhY2toYW0udXBwbWF4LnV1LnNlOi9wcm9qL2cyMDIwMDA0L3ByaXZhdGUvc3R1ZGVudF9wcm9qZWN0cy9waG9zcGhvcHJvdGVvbWljcyAvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvCmBgYAoKU2V0dGluZyB3b3JraW5nIGRpcmVjdG9yeSBhbmQgbGlicmFyaWVzCmBgYHtyfQpzZXR3ZCgifi9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0IikKUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eQpmb3IgKGkgaW4gUmVxdWlyZWRQYWNrYWdlcykgeyAjSW5zdGFsbHMgcGFja2FnZXMgaWYgbm90IHlldCBpbnN0YWxsZWQKICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpCn0KYGBgCgpMb2FkIHJhdyBkYXRhIGFuZCBjaGFuZ2UgZGVmYXVsdCBzZXBhcmF0b3IgdG8gIjsiCmBgYHtyfQpyYXdfZGF0YV9waG9zcGhvIDwtIHJlYWQuY3N2KGZpbGUgPSAiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUGhvc3Boby5jc3YiLCBzZXAgPSAiOyIpCnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9ICIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9Qcm90ZW9tZS5jc3YiLCBzZXAgPSAiOyIpCmBgYApJZiBsb29wIHRvIG9taXQgbmEudmFsdWUgZnJvbSBhbGwgQWJ1bmRhbmNlIGNvbHVtbnMKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZSIsIGNvbG5hbWVzKHJhd19kYXRhX3Bob3NwaG8pICkKZm9yIChpIGluIEFidW5kYW5jZV9jb2x1bW5zKSB7CiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdCiAgfQpgYGAKCkNhbGN1bGF0ZSBNZWFuIGZvciBBYnVuZGFuY2UgYW5kIGFkZGluZyBpdCBhcyBjb2x1bW4gYW5kIFJhdGlvIExJRi9Db250cm9sCmBgYHtyfQpBYnVuZGFuY2VfY29sdW1ucyA8LSBncmVwKCJBYnVuZGFuY2UuQ29udHJvbCIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkNvbnRyb2wgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZS5MSUYiLCBjb2xuYW1lcyhkYXRhX3Bob3NwaG8pKQpkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbyA8LSBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgLyBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sCmBgYAoKQ2FsY3VsYXRlIHAtdmFsdWVzCmBgYHtyfQpoaXN0KGRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbykKaSA9IDEKZm9yIChyb3cgaW4gMTpucm93KGRhdGFfcGhvc3BobykpIHsKICBwX3ZhbHVlIDwtIHQudGVzdChkYXRhX3Bob3NwaG9baSwxMDoxMl0sIGRhdGFfcGhvc3Bob1tpLDEzOjE1XSkgCiAgI3Rlc3RzIGlmIG1lYW4gb2YgY29udHJvbCBpcyBkaWZmZXJlbnQgZnJvbSBtZWFuIG9mIExJRiAoY2FzZSkgYW5kIGFzc2lnbnMgaXQgdG8gbGlzdCBwX3ZhbHVlCiAgZGF0YV9waG9zcGhvJEFidWRhbmNlLnB2YWx1ZVtpXSA8LSBwX3ZhbHVlJHAudmFsdWUgCiAgI3NlbGVjdHMgcC52YWx1ZSBmcm9tIGxpc3QgYW5kIGFzc2lnbnMgaXQgdG8gbmV3IGNvbHVtbiJBYnVkYW5jZS5wdmFsdWUiIGluIHRoZSBjb3JyZWN0IHJvdwogIGkgPSAxK2kKfQpgYGAKCgoKQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkN0cmwrQWx0K0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDdHJsK1NoaWZ0K0sqIHRvIHByZXZpZXcgdGhlIEhUTUwgZmlsZSkuCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCg==</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawoKLS0tCioqKgojIyMjIERvd25sb2FkIHJhdyBkYXRhIGZyb20gVXBwbWF4CmBgYHtiYXNofQpyc3luYyAtciBub2FoZUByYWNraGFtLnVwcG1heC51dS5zZTovcHJvai9nMjAyMDAwNC9wcml2YXRlL3N0dWRlbnRfcHJvamVjdHMvcGhvc3Bob3Byb3Rlb21pY3MgL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0LwpgYGAKCiMjIyMgU2V0dGluZyB3b3JraW5nIGRpcmVjdG9yeSBhbmQgbGlicmFyaWVzCmBgYHtyfQpzZXR3ZCgifi9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0IikKUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eQpmb3IgKGkgaW4gUmVxdWlyZWRQYWNrYWdlcykgeyAjSW5zdGFsbHMgcGFja2FnZXMgaWYgbm90IHlldCBpbnN0YWxsZWQKICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpCn0KYGBgCgojIyMjIExvYWQgcmF3IGRhdGEgYW5kIGNoYW5nZSBkZWZhdWx0IHNlcGFyYXRvciB0byAiOyIKYGBge3J9CnJhd19kYXRhX3Bob3NwaG8gPC0gcmVhZC5jc3YoZmlsZSA9ICIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9QaG9zcGhvLmNzdiIsIHNlcCA9ICI7IikKcmF3X2RhdGFfcHJvdGVvbSA8LSByZWFkLmNzdihmaWxlID0gIi9ob21lL25vYWgvcGhvc3Bob3Byb3Rlb21pY3NfcHJvamVjdC9waG9zcGhvcHJvdGVvbWljcy9EYXRhc2V0X1Byb3Rlb21lLmNzdiIsIHNlcCA9ICI7IikKYGBgCiMjIyMgSWYgbG9vcCB0byBvbWl0IG5hLnZhbHVlIGZyb20gYWxsIEFidW5kYW5jZSBjb2x1bW5zLiAKLSBncmVwIGxpbmUgc2VsZWN0cyBhbGwgY29sdW1ucyB0aGF0IGNvbnRhaW4gdGhlIHN0cmluZyAiQWJ1bmRhbmNlIiBhbmQgc2F2ZXMgdGhlIGNvbHVtbiBudW1iZXIgaW4gKkFidW5kYW5jZV9jb2x1bW5zKgotIFRoZSBmb3IgbG9vcCB0aGVuIHNlbGVjdHMgYWxsIHJvdyB3ZXJlIHRoZXJlIGlzICpubyogTkEgdmFsdWUgaW4gb25lIG9mIHRoZSBBYnVuZGFuY2UgY29sdW1ucyBhbmQgY29waWVzIHRoZW0gdG8gZGF0YV9waG9zcGhvIHRvIGxlYXZlIHRoZSByYXcgZGF0YSB1bnRvdWNoZWQuCi0gKiohKGlzLm5hKHJhd19kYXRhX3Bob3NwaG9bLGldKSkqKiBnaXZlcyBvdXQgYWxsIHRoZSByb3dzIHRoYXQgZG9uJ3QgaGF2ZSBhbiBOQSB2YWx1ZSwgdGhlc2UgZ2V0IHNlbGVjdGVkLgoKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZSIsIGNvbG5hbWVzKHJhd19kYXRhX3Bob3NwaG8pICkKZm9yIChpIGluIEFidW5kYW5jZV9jb2x1bW5zKSB7CiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdCiAgfQpgYGAKCiMjIyMgQ2FsY3VsYXRlIE1lYW4gZm9yIEFidW5kYW5jZSBhbmQgYWRkaW5nIGl0IGFzIGNvbHVtbiBhbmQgUmF0aW8gTElGL0NvbnRyb2wKLSBncmVwIGFnYWluIEFidW5kYW5jZSBidXQgdGhpcyB0aW1lIHRoZSBDb250cm9sIGFuZCBMSUYgKGNhc2UpIHNlcGVyYXRseS4gCi0gY2FsY3VsYXRlIHJvdyBtZWFucyBlYWNoIGFuZCB0aGUgcmF0aW9uIGJldHdlZW4gdGhlIG1lYW5zLgoKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZS5Db250cm9sIiwgY29sbmFtZXMoZGF0YV9waG9zcGhvKSkKZGF0YV9waG9zcGhvJEFidWRhbmNlLk1lYW4uQ29udHJvbCA8LSByb3dNZWFucyhkYXRhX3Bob3NwaG9bLGMoQWJ1bmRhbmNlX2NvbHVtbnMpXSkKQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcCgiQWJ1bmRhbmNlLkxJRiIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkxJRiA8LSByb3dNZWFucyhkYXRhX3Bob3NwaG9bLGMoQWJ1bmRhbmNlX2NvbHVtbnMpXSkKZGF0YV9waG9zcGhvJEFidWRhbmNlLlJhdGlvIDwtIGRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkxJRiAvIGRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkNvbnRyb2wKYGBgCgojIyMjIENhbGN1bGF0ZSBwLXZhbHVlcwotICp0LnRlc3QqIHRvIGNvbXBhcmUgYWxsIDMgQ29udHJvbCA8LT4gMyBDYXNlIHZhbHVlcy4gSWYgdGhleSBhcmUgZGlmZmVyZW50IHRoZW4gdGhlIHB2YWx1ZSA8IDAuMDUgKiotPioqIGluZGljYXRpbmcgYSByZWFsIGRpZmZlcmVuY2VzIGJldHdlZW4gY2FzZSAmIGNvbnRyb2wuIElmIHAtdmFsdWUgaXMgYmlnIHRoZSBkaWZmZXJlbmNlIGlzIGJ5IGNoYW5jZfCfmIQgSSB0cmllZCBpdCBmb3Igcm93IDE4OCB3aGljaCBoYXMgYSBSYXRpb24gbmVhcmx5IGVxdWFsIHRvIDEgKDEuMDIuLi4pIGluZGljYXRpbmcgbm8gZGlmZmVyZW5jZSBpbiBjYXNlIHZzLiBjb250cm9sIGFuZCB0aGUgcCB2YWx1ZSB+IDAuNyAocmVhbGx5IGJhZCkgYWxzbyBpbmRpY2F0aW5nIG5vIGRpZmZlcmVuY2UuCmBgYHtyfQpoaXN0KGRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbykKaSA9IDEKZm9yIChyb3cgaW4gMTpucm93KGRhdGFfcGhvc3BobykpIHsKICBwX3ZhbHVlIDwtIHQudGVzdChkYXRhX3Bob3NwaG9baSwxMDoxMl0sIGRhdGFfcGhvc3Bob1tpLDEzOjE1XSkgCiAgI3Rlc3RzIGlmIG1lYW4gb2YgY29udHJvbCBpcyBkaWZmZXJlbnQgZnJvbSBtZWFuIG9mIExJRiAoY2FzZSkgYW5kIGFzc2lnbnMgaXQgdG8gbGlzdCBwX3ZhbHVlCiAgZGF0YV9waG9zcGhvJEFidWRhbmNlLnB2YWx1ZVtpXSA8LSBwX3ZhbHVlJHAudmFsdWUgCiAgI3NlbGVjdHMgcC52YWx1ZSBmcm9tIGxpc3QgYW5kIGFzc2lnbnMgaXQgdG8gbmV3IGNvbHVtbiJBYnVkYW5jZS5wdmFsdWUiIGluIHRoZSBjb3JyZWN0IHJvdwogIGkgPSAxK2kKfQpgYGAKIyMjIyBDbGVhbmluZyBhbmQgZmlsdGVyaW5nIHRoZSBkYXRhc2V0Ci0gYS4gUmVtb3ZlIHBlcHRpZGVzIHdpdGhvdXQgcXVhbnRpdGF0aXZlIHZhbHVlcyAtPiBBbHJlYWR5IGRvbmUgaW4gIklmIGxvb3AgdG8gb21pdCBuYS52YWx1ZSBmcm9tIGFsbCBBYnVuZGFuY2UgY29sdW1ucyIgdGhlcmVieSBjcmVhdGluZyB0aGUgZGF0YV9waG9zcGhvCmBgYHtyfQojZW1wdHkKYGBgCgo=</div>
 
 
 
