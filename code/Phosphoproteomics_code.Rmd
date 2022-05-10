@@ -41,7 +41,14 @@ data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abu
 Calculate p-values
 ```{r}
 hist(data_phospho$Abudance.Ratio)
-
+i = 1
+for (row in 1:nrow(data_phospho)) {
+  p_value <- t.test(data_phospho[i,10:12], data_phospho[i,13:15]) 
+  #tests if mean of control is different from mean of LIF (case) and assigns it to list p_value
+  data_phospho$Abudance.pvalue[i] <- p_value$p.value 
+  #selects p.value from list and assigns it to new column"Abudance.pvalue" in the correct row
+  i = 1+i
+}
 ```
 
 

@@ -1779,14 +1779,9 @@ pre code {
 <p>Setting working directory and libraries</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJ+L3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3RcIilcbmBgYCJ9 -->
-<pre class="r"><code>setwd(&quot;~/phosphoproteomics_project&quot;)</code></pre>
-<!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiV2FybmluZzogVGhlIHdvcmtpbmcgZGlyZWN0b3J5IHdhcyBjaGFuZ2VkIHRvIC9ob21lL25vYWgvcGhvc3Bob3Byb3Rlb21pY3NfcHJvamVjdCBpbnNpZGUgYSBub3RlYm9vayBjaHVuay4gVGhlIHdvcmtpbmcgZGlyZWN0b3J5IHdpbGwgYmUgcmVzZXQgd2hlbiB0aGUgY2h1bmsgaXMgZmluaXNoZWQgcnVubmluZy4gVXNlIHRoZSBrbml0ciByb290LmRpciBvcHRpb24gaW4gdGhlIHNldHVwIGNodW5rIHRvIGNoYW5nZSB0aGUgd29ya2luZyBkaXJlY3RvcnkgZm9yIG5vdGVib29rIGNodW5rcy5cbiJ9 -->
-<pre><code>Warning: The working directory was changed to /home/noah/phosphoproteomics_project inside a notebook chunk. The working directory will be reset when the chunk is finished running. Use the knitr root.dir option in the setup chunk to change the working directory for notebook chunks.</code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eVxuZm9yIChpIGluIFJlcXVpcmVkUGFja2FnZXMpIHsgI0luc3RhbGxzIHBhY2thZ2VzIGlmIG5vdCB5ZXQgaW5zdGFsbGVkXG4gICAgaWYgKCFyZXF1aXJlKGksIGNoYXJhY3Rlci5vbmx5ID0gVFJVRSkpIGluc3RhbGwucGFja2FnZXMoaSlcbn1cbmBgYCJ9 -->
-<pre class="r"><code>RequiredPackages &lt;- c() #yet empty
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuc2V0d2QoXCJ+L3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3RcIilcblJlcXVpcmVkUGFja2FnZXMgPC0gYygpICN5ZXQgZW1wdHlcbmZvciAoaSBpbiBSZXF1aXJlZFBhY2thZ2VzKSB7ICNJbnN0YWxscyBwYWNrYWdlcyBpZiBub3QgeWV0IGluc3RhbGxlZFxuICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpXG59XG5gYGAifQ== -->
+<pre class="r"><code>setwd(&quot;~/phosphoproteomics_project&quot;)
+RequiredPackages &lt;- c() #yet empty
 for (i in RequiredPackages) { #Installs packages if not yet installed
     if (!require(i, character.only = TRUE)) install.packages(i)
 }</code></pre>
@@ -1805,13 +1800,11 @@ raw_data_proteom &lt;- read.csv(file = &quot;/home/noah/phosphoproteomics_projec
 <p>If loop to omit na.value from all Abundance columns</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZVwiLCBjb2xuYW1lcyhyYXdfZGF0YV9waG9zcGhvKSApXG5mb3IgKGkgaW4gQWJ1bmRhbmNlX2NvbHVtbnMpIHtcbiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdXG4gIH1cblxuIFxuYGBgIn0= -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZVwiLCBjb2xuYW1lcyhyYXdfZGF0YV9waG9zcGhvKSApXG5mb3IgKGkgaW4gQWJ1bmRhbmNlX2NvbHVtbnMpIHtcbiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdXG4gIH1cbmBgYCJ9 -->
 <pre class="r"><code>Abundance_columns &lt;- grep(&quot;Abundance&quot;, colnames(raw_data_phospho) )
 for (i in Abundance_columns) {
   data_phospho &lt;- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
-  }
-
- </code></pre>
+  }</code></pre>
 <!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
@@ -1819,36 +1812,29 @@ for (i in Abundance_columns) {
 LIF/Control</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmF3X2RhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkNvbnRyb2wgPC0gcm93Lk1lYW4ocmF3X2RhdGFfcGhvc3Bob1ssYygxMDoxMildKVxuXG5gYGAifQ== -->
-<pre class="r"><code>raw_data_phospho$Abudance.Mean.Control &lt;- row.Mean(raw_data_phospho[,c(10:12)])
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZS5Db250cm9sXCIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpXG5kYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sIDwtIHJvd01lYW5zKGRhdGFfcGhvc3Bob1ssYyhBYnVuZGFuY2VfY29sdW1ucyldKVxuQWJ1bmRhbmNlX2NvbHVtbnMgPC0gZ3JlcChcIkFidW5kYW5jZS5MSUZcIiwgY29sbmFtZXMoZGF0YV9waG9zcGhvKSlcbmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkxJRiA8LSByb3dNZWFucyhkYXRhX3Bob3NwaG9bLGMoQWJ1bmRhbmNlX2NvbHVtbnMpXSlcbmRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbyA8LSBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgLyBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sXG5gYGAifQ== -->
+<pre class="r"><code>Abundance_columns &lt;- grep(&quot;Abundance.Control&quot;, colnames(data_phospho))
+data_phospho$Abudance.Mean.Control &lt;- rowMeans(data_phospho[,c(Abundance_columns)])
+Abundance_columns &lt;- grep(&quot;Abundance.LIF&quot;, colnames(data_phospho))
+data_phospho$Abudance.Mean.LIF &lt;- rowMeans(data_phospho[,c(Abundance_columns)])
+data_phospho$Abudance.Ratio &lt;- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiRXJyb3IgaW4gcm93Lk1lYW4ocmF3X2RhdGFfcGhvc3Bob1ssIGMoMTA6MTIpXSkgOiBcbiAgY291bGQgbm90IGZpbmQgZnVuY3Rpb24gXCJyb3cuTWVhblwiXG4ifQ== -->
-<pre><code>Error in row.Mean(raw_data_phospho[, c(10:12)]) : 
-  could not find function &quot;row.Mean&quot;</code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Calculate p-values</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxudC50ZXN0KGRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbylcblxuYGBgIn0= -->
-<pre class="r"><code>t.test(data_phospho$Abudance.Ratio)
-</code></pre>
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuaGlzdChkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuUmF0aW8pXG5pID0gMVxuZm9yIChyb3cgaW4gMTpucm93KGRhdGFfcGhvc3BobykpIHtcbiAgcF92YWx1ZSA8LSB0LnRlc3QoZGF0YV9waG9zcGhvW2ksMTA6MTJdLCBkYXRhX3Bob3NwaG9baSwxMzoxNV0pIFxuICAjdGVzdHMgaWYgbWVhbiBvZiBjb250cm9sIGlzIGRpZmZlcmVudCBmcm9tIG1lYW4gb2YgTElGIChjYXNlKSBhbmQgYXNzaWducyBpdCB0byBsaXN0IHBfdmFsdWVcbiAgZGF0YV9waG9zcGhvJEFidWRhbmNlLnB2YWx1ZVtpXSA8LSBwX3ZhbHVlJHAudmFsdWUgXG4gICNzZWxlY3RzIHAudmFsdWUgZnJvbSBsaXN0IGFuZCBhc3NpZ25zIGl0IHRvIG5ldyBjb2x1bW5cIkFidWRhbmNlLnB2YWx1ZVwiIGluIHRoZSBjb3JyZWN0IHJvd1xuICBpID0gMStpXG59XG5gYGAifQ== -->
+<pre class="r"><code>hist(data_phospho$Abudance.Ratio)
+i = 1
+for (row in 1:nrow(data_phospho)) {
+  p_value &lt;- t.test(data_phospho[i,10:12], data_phospho[i,13:15]) 
+  #tests if mean of control is different from mean of LIF (case) and assigns it to list p_value
+  data_phospho$Abudance.pvalue[i] &lt;- p_value$p.value 
+  #selects p.value from list and assigns it to new column&quot;Abudance.pvalue&quot; in the correct row
+  i = 1+i
+}</code></pre>
 <!-- rnb-source-end -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5cdE9uZSBTYW1wbGUgdC10ZXN0XG5cbmRhdGE6ICBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuUmF0aW9cbnQgPSAxODQuNDEsIGRmID0gNDM0NiwgcC12YWx1ZSA8IDIuMmUtMTZcbmFsdGVybmF0aXZlIGh5cG90aGVzaXM6IHRydWUgbWVhbiBpcyBub3QgZXF1YWwgdG8gMFxuOTUgcGVyY2VudCBjb25maWRlbmNlIGludGVydmFsOlxuIDEuMDUwMTc5IDEuMDcyNzQ4XG5zYW1wbGUgZXN0aW1hdGVzOlxubWVhbiBvZiB4IFxuIDEuMDYxNDY0IFxuIn0= -->
-<pre><code>
-    One Sample t-test
-
-data:  data_phospho$Abudance.Ratio
-t = 184.41, df = 4346, p-value &lt; 2.2e-16
-alternative hypothesis: true mean is not equal to 0
-95 percent confidence interval:
- 1.050179 1.072748
-sample estimates:
-mean of x 
- 1.061464 </code></pre>
-<!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <p>Add a new chunk by clicking the <em>Insert Chunk</em> button on the
@@ -1862,7 +1848,7 @@ run any R code chunks. Instead, the output of the chunk when it was last
 run in the editor is displayed.</p>
 <!-- rnb-text-end -->
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KRG93bmxvYWQgcmF3IGRhdGEKYGBge2Jhc2h9CnJzeW5jIC1yIG5vYWhlQHJhY2toYW0udXBwbWF4LnV1LnNlOi9wcm9qL2cyMDIwMDA0L3ByaXZhdGUvc3R1ZGVudF9wcm9qZWN0cy9waG9zcGhvcHJvdGVvbWljcyAvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvCmBgYAoKU2V0dGluZyB3b3JraW5nIGRpcmVjdG9yeSBhbmQgbGlicmFyaWVzCmBgYHtyfQpzZXR3ZCgifi9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0IikKUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eQpmb3IgKGkgaW4gUmVxdWlyZWRQYWNrYWdlcykgeyAjSW5zdGFsbHMgcGFja2FnZXMgaWYgbm90IHlldCBpbnN0YWxsZWQKICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpCn0KYGBgCgpMb2FkIHJhdyBkYXRhIGFuZCBjaGFuZ2UgZGVmYXVsdCBzZXBhcmF0b3IgdG8gIjsiCmBgYHtyfQpyYXdfZGF0YV9waG9zcGhvIDwtIHJlYWQuY3N2KGZpbGUgPSAiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUGhvc3Boby5jc3YiLCBzZXAgPSAiOyIpCnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9ICIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9Qcm90ZW9tZS5jc3YiLCBzZXAgPSAiOyIpCmBgYApJZiBsb29wIHRvIG9taXQgbmEudmFsdWUgZnJvbSBhbGwgQWJ1bmRhbmNlIGNvbHVtbnMKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZSIsIGNvbG5hbWVzKHJhd19kYXRhX3Bob3NwaG8pICkKZm9yIChpIGluIEFidW5kYW5jZV9jb2x1bW5zKSB7CiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdCiAgfQpgYGAKCkNhbGN1bGF0ZSBNZWFuIGZvciBBYnVuZGFuY2UgYW5kIGFkZGluZyBpdCBhcyBjb2x1bW4gYW5kIFJhdGlvIExJRi9Db250cm9sCmBgYHtyfQpBYnVuZGFuY2VfY29sdW1ucyA8LSBncmVwKCJBYnVuZGFuY2UuQ29udHJvbCIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkNvbnRyb2wgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZS5MSUYiLCBjb2xuYW1lcyhkYXRhX3Bob3NwaG8pKQpkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbyA8LSBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgLyBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sCmBgYAoKQ2FsY3VsYXRlIHAtdmFsdWVzCmBgYHtyfQpoaXN0KGRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbykKCmBgYAoKCgpBZGQgYSBuZXcgY2h1bmsgYnkgY2xpY2tpbmcgdGhlICpJbnNlcnQgQ2h1bmsqIGJ1dHRvbiBvbiB0aGUgdG9vbGJhciBvciBieSBwcmVzc2luZyAqQ3RybCtBbHQrSSouCgpXaGVuIHlvdSBzYXZlIHRoZSBub3RlYm9vaywgYW4gSFRNTCBmaWxlIGNvbnRhaW5pbmcgdGhlIGNvZGUgYW5kIG91dHB1dCB3aWxsIGJlIHNhdmVkIGFsb25nc2lkZSBpdCAoY2xpY2sgdGhlICpQcmV2aWV3KiBidXR0b24gb3IgcHJlc3MgKkN0cmwrU2hpZnQrSyogdG8gcHJldmlldyB0aGUgSFRNTCBmaWxlKS4KClRoZSBwcmV2aWV3IHNob3dzIHlvdSBhIHJlbmRlcmVkIEhUTUwgY29weSBvZiB0aGUgY29udGVudHMgb2YgdGhlIGVkaXRvci4gQ29uc2VxdWVudGx5LCB1bmxpa2UgKktuaXQqLCAqUHJldmlldyogZG9lcyBub3QgcnVuIGFueSBSIGNvZGUgY2h1bmtzLiBJbnN0ZWFkLCB0aGUgb3V0cHV0IG9mIHRoZSBjaHVuayB3aGVuIGl0IHdhcyBsYXN0IHJ1biBpbiB0aGUgZWRpdG9yIGlzIGRpc3BsYXllZC4K</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUGhvc3Bob3Byb3Rlb21pY3MiCm91dHB1dDogaHRtbF9ub3RlYm9vawotLS0KRG93bmxvYWQgcmF3IGRhdGEKYGBge2Jhc2h9CnJzeW5jIC1yIG5vYWhlQHJhY2toYW0udXBwbWF4LnV1LnNlOi9wcm9qL2cyMDIwMDA0L3ByaXZhdGUvc3R1ZGVudF9wcm9qZWN0cy9waG9zcGhvcHJvdGVvbWljcyAvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvCmBgYAoKU2V0dGluZyB3b3JraW5nIGRpcmVjdG9yeSBhbmQgbGlicmFyaWVzCmBgYHtyfQpzZXR3ZCgifi9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0IikKUmVxdWlyZWRQYWNrYWdlcyA8LSBjKCkgI3lldCBlbXB0eQpmb3IgKGkgaW4gUmVxdWlyZWRQYWNrYWdlcykgeyAjSW5zdGFsbHMgcGFja2FnZXMgaWYgbm90IHlldCBpbnN0YWxsZWQKICAgIGlmICghcmVxdWlyZShpLCBjaGFyYWN0ZXIub25seSA9IFRSVUUpKSBpbnN0YWxsLnBhY2thZ2VzKGkpCn0KYGBgCgpMb2FkIHJhdyBkYXRhIGFuZCBjaGFuZ2UgZGVmYXVsdCBzZXBhcmF0b3IgdG8gIjsiCmBgYHtyfQpyYXdfZGF0YV9waG9zcGhvIDwtIHJlYWQuY3N2KGZpbGUgPSAiL2hvbWUvbm9haC9waG9zcGhvcHJvdGVvbWljc19wcm9qZWN0L3Bob3NwaG9wcm90ZW9taWNzL0RhdGFzZXRfUGhvc3Boby5jc3YiLCBzZXAgPSAiOyIpCnJhd19kYXRhX3Byb3Rlb20gPC0gcmVhZC5jc3YoZmlsZSA9ICIvaG9tZS9ub2FoL3Bob3NwaG9wcm90ZW9taWNzX3Byb2plY3QvcGhvc3Bob3Byb3Rlb21pY3MvRGF0YXNldF9Qcm90ZW9tZS5jc3YiLCBzZXAgPSAiOyIpCmBgYApJZiBsb29wIHRvIG9taXQgbmEudmFsdWUgZnJvbSBhbGwgQWJ1bmRhbmNlIGNvbHVtbnMKYGBge3J9CkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZSIsIGNvbG5hbWVzKHJhd19kYXRhX3Bob3NwaG8pICkKZm9yIChpIGluIEFidW5kYW5jZV9jb2x1bW5zKSB7CiAgZGF0YV9waG9zcGhvIDwtIHJhd19kYXRhX3Bob3NwaG9bIShpcy5uYShyYXdfZGF0YV9waG9zcGhvWyxpXSkpLCBdCiAgfQpgYGAKCkNhbGN1bGF0ZSBNZWFuIGZvciBBYnVuZGFuY2UgYW5kIGFkZGluZyBpdCBhcyBjb2x1bW4gYW5kIFJhdGlvIExJRi9Db250cm9sCmBgYHtyfQpBYnVuZGFuY2VfY29sdW1ucyA8LSBncmVwKCJBYnVuZGFuY2UuQ29udHJvbCIsIGNvbG5hbWVzKGRhdGFfcGhvc3BobykpCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5NZWFuLkNvbnRyb2wgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCkFidW5kYW5jZV9jb2x1bW5zIDwtIGdyZXAoIkFidW5kYW5jZS5MSUYiLCBjb2xuYW1lcyhkYXRhX3Bob3NwaG8pKQpkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgPC0gcm93TWVhbnMoZGF0YV9waG9zcGhvWyxjKEFidW5kYW5jZV9jb2x1bW5zKV0pCmRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbyA8LSBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5MSUYgLyBkYXRhX3Bob3NwaG8kQWJ1ZGFuY2UuTWVhbi5Db250cm9sCmBgYAoKQ2FsY3VsYXRlIHAtdmFsdWVzCmBgYHtyfQpoaXN0KGRhdGFfcGhvc3BobyRBYnVkYW5jZS5SYXRpbykKaSA9IDEKZm9yIChyb3cgaW4gMTpucm93KGRhdGFfcGhvc3BobykpIHsKICBwX3ZhbHVlIDwtIHQudGVzdChkYXRhX3Bob3NwaG9baSwxMDoxMl0sIGRhdGFfcGhvc3Bob1tpLDEzOjE1XSkgCiAgI3Rlc3RzIGlmIG1lYW4gb2YgY29udHJvbCBpcyBkaWZmZXJlbnQgZnJvbSBtZWFuIG9mIExJRiAoY2FzZSkgYW5kIGFzc2lnbnMgaXQgdG8gbGlzdCBwX3ZhbHVlCiAgZGF0YV9waG9zcGhvJEFidWRhbmNlLnB2YWx1ZVtpXSA8LSBwX3ZhbHVlJHAudmFsdWUgCiAgI3NlbGVjdHMgcC52YWx1ZSBmcm9tIGxpc3QgYW5kIGFzc2lnbnMgaXQgdG8gbmV3IGNvbHVtbiJBYnVkYW5jZS5wdmFsdWUiIGluIHRoZSBjb3JyZWN0IHJvdwogIGkgPSAxK2kKfQpgYGAKCgoKQWRkIGEgbmV3IGNodW5rIGJ5IGNsaWNraW5nIHRoZSAqSW5zZXJ0IENodW5rKiBidXR0b24gb24gdGhlIHRvb2xiYXIgb3IgYnkgcHJlc3NpbmcgKkN0cmwrQWx0K0kqLgoKV2hlbiB5b3Ugc2F2ZSB0aGUgbm90ZWJvb2ssIGFuIEhUTUwgZmlsZSBjb250YWluaW5nIHRoZSBjb2RlIGFuZCBvdXRwdXQgd2lsbCBiZSBzYXZlZCBhbG9uZ3NpZGUgaXQgKGNsaWNrIHRoZSAqUHJldmlldyogYnV0dG9uIG9yIHByZXNzICpDdHJsK1NoaWZ0K0sqIHRvIHByZXZpZXcgdGhlIEhUTUwgZmlsZSkuCgpUaGUgcHJldmlldyBzaG93cyB5b3UgYSByZW5kZXJlZCBIVE1MIGNvcHkgb2YgdGhlIGNvbnRlbnRzIG9mIHRoZSBlZGl0b3IuIENvbnNlcXVlbnRseSwgdW5saWtlICpLbml0KiwgKlByZXZpZXcqIGRvZXMgbm90IHJ1biBhbnkgUiBjb2RlIGNodW5rcy4gSW5zdGVhZCwgdGhlIG91dHB1dCBvZiB0aGUgY2h1bmsgd2hlbiBpdCB3YXMgbGFzdCBydW4gaW4gdGhlIGVkaXRvciBpcyBkaXNwbGF5ZWQuCg==</div>
 
 
 
