@@ -27,14 +27,21 @@ Abundance_columns <- grep("Abundance", colnames(raw_data_phospho) )
 for (i in Abundance_columns) {
   data_phospho <- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
   }
-
- 
 ```
 
-Calculate first values
+Calculate Mean for Abundance and adding it as column and Ratio LIF/Control
 ```{r}
+Abundance_columns <- grep("Abundance.Control", colnames(data_phospho))
+data_phospho$Abudance.Mean.Control <- rowMeans(data_phospho[,c(Abundance_columns)])
+Abundance_columns <- grep("Abundance.LIF", colnames(data_phospho))
+data_phospho$Abudance.Mean.LIF <- rowMeans(data_phospho[,c(Abundance_columns)])
+data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control
+```
 
-raw_data_phospho$Abudance.Mean.Control <- row.Mean(raw_data_phospho[,c(10:12)])
+Calculate p-values
+```{r}
+hist(data_phospho$Abudance.Ratio)
+
 ```
 
 
