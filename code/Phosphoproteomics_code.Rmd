@@ -12,10 +12,15 @@ rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phos
 #### Setting working directory and libraries
 ```{r}
 setwd("~/phosphoproteomics_project")
-RequiredPackages <- c() #yet empty
+RequiredPackages <- c("BiocManager") #yet empty
 for (i in RequiredPackages) { #Installs packages if not yet installed
-    if (!require(i, character.only = TRUE)) install.packages(i)
+    if (!require(i, character.only = TRUE)) 
+    install.packages(i)
 }
+BiocManager::install(version = "3.15")
+library(BiocManager)
+BiocManager::install("STRINGdb")
+library(STRINGdb)
 ```
 
 #### Load raw data and change default separator to ";"
@@ -63,5 +68,12 @@ for (row in 1:nrow(data_phospho)) {
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 ```{r}
 more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
+```
+#### Building network map of the proteins
+```{r}
+string_db <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
+hits <- string_db$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = TRUE) #mapping the UNIPROT Ids from the first column to get STRING identifiers
+
+string_db$plot_network(hits$STRING_id) #plotting network
 ```
 
