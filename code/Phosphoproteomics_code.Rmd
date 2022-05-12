@@ -5,14 +5,16 @@ output: html_notebook
 ---
 ***
 #### Download raw data from Uppmax
+
 ```{bash}
 rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 
 #### Setting working directory and libraries
+
 ```{r}
 setwd("~/phosphoproteomics_project")
-RequiredPackages <- c("BiocManager") #yet empty
+RequiredPackages <- c("BiocManager", "dplyr", "igraph") #yet empty
 for (i in RequiredPackages) { #Installs packages if not yet installed
     if (!require(i, character.only = TRUE)) 
     install.packages(i)
@@ -20,18 +22,25 @@ for (i in RequiredPackages) { #Installs packages if not yet installed
 BiocManager::install(version = "3.15")
 library(BiocManager)
 BiocManager::install("STRINGdb")
+library(tidyr)
+library(dplyr)
+library(igraph)
 library(STRINGdb)
+
 ```
 
 #### Load raw data and change default separator to ";"
+
 ```{r}
 raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
 raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
 ```
-#### If loop to omit na.value from all Abundance columns. 
+
+#### If loop to omit na.value from all Abundance columns
 - grep line selects all columns that contain the string "Abundance" and saves the column number in *Abundance_columns*
 - The for loop then selects all row were there is *no* NA value in one of the Abundance columns and copies them to data_phospho to leave the raw data untouched.
 - **!(is.na(raw_data_phospho[,i]))** gives out all the rows that don't have an NA value, these get selected
+
 ```{r}
 Abundance_columns <- grep("Abundance", colnames(raw_data_phospho) )
 for (i in Abundance_columns) {
@@ -49,54 +58,54 @@ data_phospho$Abudance.Mean.Control <- rowMeans(data_phospho[,c(Abundance_columns
 Abundance_columns <- grep("Abundance.LIF", colnames(data_phospho))
 data_phospho$Abudance.Mean.LIF <- rowMeans(data_phospho[,c(Abundance_columns)])
 data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control
+remove(Abundance_columns, i)
 ```
 
 #### Calculate p-values
 - *t.test* to compare all 3 Control <-> 3 Case values. If they are different then the pvalue < 0.05 **->** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value ~ 0.7 (really bad) also indicating no difference.
-```{r}
-#library(dplyr)
-#library(tidyr)
 
-hist(data_phospho$Abudance.Ratio)
-i = 1
+```{r}
 start_for <- Sys.time()
 for (row in 1:nrow(data_phospho)) {
-  p_value <- t.test(data_phospho[i,10:12], data_phospho[i,13:15], alternative = "less") 
+  p_value <- t.test(data_phospho[row,10:12], data_phospho[row,13:15], alternative = "less") 
   #tests if mean of control is different from mean of LIF (case) and assigns it to list p_value
-  data_phospho$Abudance.pvalue[i] <- p_value$p.value 
+  data_phospho$Abudance.pvalue[row] <- p_value$p.value 
   #selects p.value from list and assigns it to new column"Abudance.pvalue" in the correct row
-  i = 1+i
-}
+  }
 end_for <- Sys.time()
 end_for - start_for #We wanted to compare calculation time to compare the methods
+
 #Alice quicker approach
-df_copy <- tibble(data_phospho) # Copy df
+df_copy <- dplyr::tibble(data_phospho) # Copy df
 start_alice <- Sys.time()
 df_copy[] <- lapply(df_copy, function(x) as.numeric(as.character(x)))
 df_copy$pValues <- apply(df_copy, 1, function(x) t.test(x[10:12],x[13:15], alternative = "less", paired = F)$p.value)
 end_alice <- Sys.time()
 end_alice-start_alice #Proves that apply is x4 faster then loop
-
+remove(end_alice,end_for,start_alice,start_for,row,p_value)
 ```
+
 #### Subsetting data_phospho for ratio values >= 2
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
+
 ```{r}
 more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
-
+remove(df_copy,data_phospho)
 ```
 
-
 #### Building network map of the proteins
+
 ```{r}
 string_db <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
 hits <- string_db$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = TRUE) #mapping the UNIPROT Ids from the first column to get STRING identifiers
 string_db$plot_network(hits$STRING_id) #plotting network
 string_db$get_png(hits$STRING_id, file = "~/phosphoproteomics_project/results/Network.png") #Saving photo
-
 ```
 
 #### How to identify the Proteins Stat5b is connected to
+
 ```{r}
+old_start <- Sys.time()
 #P42232 is Uniprot identifier for mouse Stat5b
 i <- grep("P42232", hits$Master.Protein.Accessions)
 Stat5b <- string_db$mp("P42232") #mapping the UNIPROT Ids 
@@ -113,7 +122,30 @@ Stat5b_interactions_protein <- unique(Stat5b_interactions_protein) #Takes only u
 gh <- data.frame(matrix(ncol = 1, nrow = 10)) #Making empty data frame
 gh <- as.data.frame(Stat5b_interactions_protein) #Filling it with our proteins
 names(gh)[1] <- "STRING_id" #Renaming column so that add_protein_description recognises it
-Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s
+Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s this final file points back to itself (Stat5b)
+old_end <- Sys.time()
+old_end-old_start
+remove(gh, i, Stat5b_interactions, from_count, old_end, old_start, Stat5b_interactions_protein , Stat5b, Stat5b_interactions_from, Stat5b_interactions_to, to_count, vectori)
 ```
 
+#### Quicker way to identify the Proteins Stat5b is connected to.
 
+```{r}
+##new better way 
+i <- grep("P42232", hits$Master.Protein.Accessions) 
+Stat5b <- string_db$mp("P42232") #mapping the UNIPROT Ids 
+Stat5b
+new_start <- Sys.time()
+get <- string_db$get_subnetwork(hits$STRING_id) #builds subnetwork from every entry in STRING_id
+ghi <- get[[Stat5b]][1] ##gives the list entry of "get" that lists all 18 entries that interact with Stat5b
+hg <- unique(ghi$`10090.ENSMUSP00000102981`) #gives the unique interaction (9 out of 18), 
+mat <- as_ids(ghi$`10090.ENSMUSP00000102981`) #function as_ids from the igraph package reads the class("igraph.vs") and collapses it into a matrix
+Proteins_connected_to_Stat5b_quick_way <- as.data.frame(unique(mat))
+names(Proteins_connected_to_Stat5b_quick_way)[1] <- "STRING_id" #Renaming column so that add_protein_description recognizes it
+Proteins_connected_to_Stat5b_quick_way <- string_db$add_proteins_description(Proteins_connected_to_Stat5b_quick_way) #Add´s protein information to STRINGid´s
+new_end <- Sys.time()
+new_end-new_start
+Proteins_connected_to_Stat5b_quick_way
+remove(get, ghi, hg, i, mat, new_end, new_start, Stat5b)
+##New method is 97x times quicker!
+```
