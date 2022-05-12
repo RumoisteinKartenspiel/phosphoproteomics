@@ -54,26 +54,66 @@ data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abu
 #### Calculate p-values
 - *t.test* to compare all 3 Control <-> 3 Case values. If they are different then the pvalue < 0.05 **->** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value ~ 0.7 (really bad) also indicating no difference.
 ```{r}
+#library(dplyr)
+#library(tidyr)
+
 hist(data_phospho$Abudance.Ratio)
 i = 1
+start_for <- Sys.time()
 for (row in 1:nrow(data_phospho)) {
-  p_value <- t.test(data_phospho[i,10:12], data_phospho[i,13:15]) 
+  p_value <- t.test(data_phospho[i,10:12], data_phospho[i,13:15], alternative = "less") 
   #tests if mean of control is different from mean of LIF (case) and assigns it to list p_value
   data_phospho$Abudance.pvalue[i] <- p_value$p.value 
   #selects p.value from list and assigns it to new column"Abudance.pvalue" in the correct row
   i = 1+i
 }
+end_for <- Sys.time()
+end_for - start_for #We wanted to compare calculation time to compare the methods
+#Alice quicker approach
+df_copy <- tibble(data_phospho) # Copy df
+start_alice <- Sys.time()
+df_copy[] <- lapply(df_copy, function(x) as.numeric(as.character(x)))
+df_copy$pValues <- apply(df_copy, 1, function(x) t.test(x[10:12],x[13:15], alternative = "less", paired = F)$p.value)
+end_alice <- Sys.time()
+end_alice-start_alice #Proves that apply is x4 faster then loop
+
 ```
 #### Subsetting data_phospho for ratio values >= 2
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 ```{r}
 more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
+
 ```
+
+
 #### Building network map of the proteins
 ```{r}
 string_db <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
 hits <- string_db$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = TRUE) #mapping the UNIPROT Ids from the first column to get STRING identifiers
-
 string_db$plot_network(hits$STRING_id) #plotting network
+string_db$get_png(hits$STRING_id, file = "~/phosphoproteomics_project/results/Network.png") #Saving photo
+
 ```
+
+#### How to identify the Proteins Stat5b is connected to
+```{r}
+#P42232 is Uniprot identifier for mouse Stat5b
+i <- grep("P42232", hits$Master.Protein.Accessions)
+Stat5b <- string_db$mp("P42232") #mapping the UNIPROT Ids 
+vectori <- hits$STRING_id
+i <- string_db$get_interactions(vectori)
+Stat5b_interactions_from <- grep(Stat5b, i$from)
+from_count <- length(Stat5b_interactions_from) #Counting elements in vector to later choose just the entries containing the protein.
+Stat5b_interactions_to <- grep(Stat5b, i$to)
+to_count <- length(Stat5b_interactions_to) #Counting elements again
+Stat5b_interactions <- c(Stat5b_interactions_from, Stat5b_interactions_to) # Combines all the the rows with Stat5b in the path
+Stat5b_interactions <- i[c(Stat5b_interactions),] # Selects only rows with Stat5b in the from or to interaction column
+Stat5b_interactions_protein <- c(Stat5b_interactions[c(1:from_count),2], Stat5b_interactions[c(from_count:(to_count+from_count)),1]) #Takes only the non Stat5b proteins
+Stat5b_interactions_protein <- unique(Stat5b_interactions_protein) #Takes only unique proteins
+gh <- data.frame(matrix(ncol = 1, nrow = 10)) #Making empty data frame
+gh <- as.data.frame(Stat5b_interactions_protein) #Filling it with our proteins
+names(gh)[1] <- "STRING_id" #Renaming column so that add_protein_description recognises it
+Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s
+```
+
 
