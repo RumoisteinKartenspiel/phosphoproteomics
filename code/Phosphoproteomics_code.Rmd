@@ -14,7 +14,7 @@ rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phos
 
 ```{r}
 setwd("~/phosphoproteomics_project")
-RequiredPackages <- c("BiocManager", "dplyr", "igraph") #yet empty
+RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr") #yet empty
 for (i in RequiredPackages) { #Installs packages if not yet installed
     if (!require(i, character.only = TRUE)) 
     install.packages(i)
@@ -122,13 +122,15 @@ Stat5b_interactions_protein <- unique(Stat5b_interactions_protein) #Takes only u
 gh <- data.frame(matrix(ncol = 1, nrow = 10)) #Making empty data frame
 gh <- as.data.frame(Stat5b_interactions_protein) #Filling it with our proteins
 names(gh)[1] <- "STRING_id" #Renaming column so that add_protein_description recognises it
-Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s this final file points back to itself (Stat5b)
+Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s 
 old_end <- Sys.time()
 old_end-old_start
+string_db$plot_network(Proteins_connected_to_Stat5b$STRING_id)
 remove(gh, i, Stat5b_interactions, from_count, old_end, old_start, Stat5b_interactions_protein , Stat5b, Stat5b_interactions_from, Stat5b_interactions_to, to_count, vectori)
 ```
 
 #### Quicker way to identify the Proteins Stat5b is connected to.
+- There is also a link to the [STRINGdb website](https://version-11-0b.string-db.org/cgi/link?to=8602E81F655D156B) with the Proteins connected to Stat5b in this dataset.
 
 ```{r}
 ##new better way 
@@ -142,10 +144,23 @@ hg <- unique(ghi$`10090.ENSMUSP00000102981`) #gives the unique interaction (9 ou
 mat <- as_ids(ghi$`10090.ENSMUSP00000102981`) #function as_ids from the igraph package reads the class("igraph.vs") and collapses it into a matrix
 Proteins_connected_to_Stat5b_quick_way <- as.data.frame(unique(mat))
 names(Proteins_connected_to_Stat5b_quick_way)[1] <- "STRING_id" #Renaming column so that add_protein_description recognizes it
+Proteins_connected_to_Stat5b_quick_way[(nrow(Proteins_connected_to_Stat5b_quick_way)+1),] <- Stat5b #Adds Stat5b to map its connections
 Proteins_connected_to_Stat5b_quick_way <- string_db$add_proteins_description(Proteins_connected_to_Stat5b_quick_way) #Add´s protein information to STRINGid´s
 new_end <- Sys.time()
 new_end-new_start
 Proteins_connected_to_Stat5b_quick_way
 remove(get, ghi, hg, i, mat, new_end, new_start, Stat5b)
 ##New method is 97x times quicker!
+string_db$plot_network(Proteins_connected_to_Stat5b_quick_way$STRING_id) #plotting network
+##Tryout
+link <- string_db$get_link(Proteins_connected_to_Stat5b_quick_way$STRING_id)
+link #Provides ling to the STRINGdb page
 ```
+
+#### Identifying Pathways
+
+```{r}
+enrichment <- string_db$get_enrichment(Proteins_connected_to_Stat5b_quick_way, category = "KEGG")
+print(enrichment$description)
+```
+
