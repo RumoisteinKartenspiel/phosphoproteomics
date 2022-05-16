@@ -9,13 +9,14 @@ output: html_notebook
 ```{bash}
 rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
-
+***
 #### Setting working directory and libraries
 
 ```{r}
 setwd("~/phosphoproteomics_project")
-RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr") #yet empty
-for (i in RequiredPackages) { #Installs packages if not yet installed
+RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr") 
+#Installs packages if not yet installed
+for (i in RequiredPackages) { 
     if (!require(i, character.only = TRUE)) 
     install.packages(i)
 }
@@ -28,15 +29,16 @@ library(igraph)
 library(STRINGdb)
 
 ```
-
+***
 #### Load raw data and change default separator to ";"
 
 ```{r}
 raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
 raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
 ```
-
+***
 #### If loop to omit na.value from all Abundance columns
+
 - grep line selects all columns that contain the string "Abundance" and saves the column number in *Abundance_columns*
 - The for loop then selects all row were there is *no* NA value in one of the Abundance columns and copies them to data_phospho to leave the raw data untouched.
 - **!(is.na(raw_data_phospho[,i]))** gives out all the rows that don't have an NA value, these get selected
@@ -47,7 +49,7 @@ for (i in Abundance_columns) {
   data_phospho <- raw_data_phospho[!(is.na(raw_data_phospho[,i])), ]
   }
 ```
-
+***
 #### Calculate Mean for Abundance and adding it as column and Ratio LIF/Control
 - grep again Abundance but this time the Control and LIF (case) seperatly. 
 - calculate row means each and the ration between the means.
@@ -63,7 +65,7 @@ data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abu
 
 remove(Abundance_columns, i)
 ```
-
+***
 #### Calculate p-values
 - *t.test* to compare all 3 Control <-> 3 Case values. If they are different then the pvalue < 0.05 **->** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value ~ 0.7 (really bad) also indicating no difference.
 
@@ -87,8 +89,8 @@ end_alice <- Sys.time()
 end_alice-start_alice #Proves that apply is x4 faster then loop
 remove(end_alice,end_for,start_alice,start_for,row,p_value, df_copy)
 ```
-
-####Adding a Volcano plot to explore the initial data
+***
+#### Adding a Volcano plot to explore the initial data
 
 ```{r}
 ### Phospho volcano plot
@@ -107,7 +109,6 @@ phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessi
 string_db_volcano <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="")
 Mapping_phospho <- string_db_volcano$map(phospho, "delabel", removeUnmappedRows = F)
 Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s 
-colnames(Mapping_phospho)
 #Volcano plot overview
 ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffexpressed, label=preferred_name))+
   geom_point()+
@@ -116,6 +117,7 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   geom_hline(yintercept=-log10(0.05), col="red")
 
 ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano.png", width = 1500, height = 1000, units = "px")
+
 #Detail/Zoomed in
 ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffexpressed, label=preferred_name))+
   geom_point()+
@@ -129,8 +131,8 @@ ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500
 
 remove(phospho, Mapping_phospho, string_db_volcano)
 ```
-
-#### Subsetting data_phospho for ratio values >= 2
+***
+#### Subsetting data_phospho for ratio values >= 2 and p-values <= 0.05
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 - Here just the data.frame is subset, selecting only Ratios >= 2 and p-values <= 0.05
 
@@ -139,7 +141,7 @@ more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abu
 more_phosphorylated <- subset.data.frame(more_phosphorylated, subset = more_phosphorylated$Abudance.pvalue <= 0.05) # Filters out all non-significant p-values
 remove(data_phospho)
 ```
-
+***
 #### Building network map of the proteins
 
 ```{r}
@@ -158,45 +160,81 @@ string_db_high$plot_network(hits_high$STRING_id) #plotting network
 string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomics_project/results/Network_high.png") #Saving photo
 ```
 
-
+***
 #### Way to identify the Proteins Stat5b is connected to.
-- There is also a link to the [STRINGdb website](https://version-11-0b.string-db.org/cgi/link?to=8602E81F655D156B) with the Proteins connected to Stat5b in this dataset.
+- There is also a link to the [STRINGdb website for less stringent threshold = 1 ](https://version-11-0b.string-db.org/cgi/link?to=8602E81F655D156B) with the Proteins connected to Stat5b in this dataset.
+- There is also a link to the [STRINGdb website for more stringent threshold = 200 ](https://version-11-0b.string-db.org/cgi/link?to=57B67172C2751CB6) with the Proteins connected to Stat5b in this dataset.
 
 ```{r}
-##new better way 
-i <- grep("P42232", hits$Master.Protein.Accessions) 
-Stat5b <- string_db$mp("P42232") #mapping the UNIPROT Ids 
-Stat5b
-new_start <- Sys.time()
-get <- string_db$get_subnetwork(hits$STRING_id) #builds subnetwork from every entry in STRING_id
-ghi <- get[[Stat5b]][1] ##gives the list entry of "get" that lists all 18 entries that interact with Stat5b
-hg <- unique(ghi$`10090.ENSMUSP00000102981`) #gives the unique interaction (9 out of 18), 
-mat <- as_ids(ghi$`10090.ENSMUSP00000102981`) #function as_ids from the igraph package reads the class("igraph.vs") and collapses it into a matrix
-Proteins_connected_to_Stat5b_quick_way <- as.data.frame(unique(mat))
-names(Proteins_connected_to_Stat5b_quick_way)[1] <- "STRING_id" #Renaming column so that add_protein_description recognizes it
-Proteins_connected_to_Stat5b_quick_way[(nrow(Proteins_connected_to_Stat5b_quick_way)+1),] <- Stat5b #Adds Stat5b to map its connections
-Proteins_connected_to_Stat5b_quick_way <- string_db$add_proteins_description(Proteins_connected_to_Stat5b_quick_way) #Add´s protein information to STRINGid´s
-new_end <- Sys.time()
-new_end-new_start
-Proteins_connected_to_Stat5b_quick_way
-remove(get, ghi, hg, i, mat, new_end, new_start, Stat5b)
-##New method is 97x times quicker!
-string_db$plot_network(Proteins_connected_to_Stat5b_quick_way$STRING_id) #plotting network
-##Tryout
-link <- string_db$get_link(Proteins_connected_to_Stat5b_quick_way$STRING_id)
-link #Provides ling to the STRINGdb page
+#Finding String id identifier for Stat5b and assigning it to the a variable
+i <- grep("P42232", hits_low$Master.Protein.Accessions) 
+Stat5b <- string_db_low$mp("P42232") #mapping the UNIPROT Ids 
+
+## Mapping Stat5b interactions in the less stringent data set and more stringent data set
+
+#Defining a function to get 1. Proteins_connected_to_Stat5b, 2. Network plot, 3. Link to webpage, 4. Pathways
+subnetworks <- function(data_h,score_h) {
+  #a = The data we want to have a network from, b = the threshold number of the string_db function
+  string_db <- STRINGdb$new(version="11.0b", species=10090, score_threshold = score_h, input_directory="") #species = mouse 
+  get <- string_db$get_subnetwork(data_h) #builds subnetwork from every entry in STRING_id
+  ghi <- get[[Stat5b]][1] ##gives the list entry of "get" that lists all 18 entries that interact with Stat5b
+  hg <- unique(ghi$`10090.ENSMUSP00000102981`) #gives the unique interaction (9 out of 18), 
+  mat <- as_ids(ghi$`10090.ENSMUSP00000102981`) #function as_ids from the igraph package reads the class("igraph.vs")   and collapses it into a matrix
+  Proteins_connected_to_Stat5b <- as.data.frame(unique(mat))
+  names(Proteins_connected_to_Stat5b)[1] <- "STRING_id" #Renaming column so that add_protein_description recognizes it
+  Proteins_connected_to_Stat5b[(nrow(Proteins_connected_to_Stat5b)+1),] <- Stat5b #Adds Stat5b to map its connections
+  Proteins_connected_to_Stat5b <- string_db$add_proteins_description(Proteins_connected_to_Stat5b) #Add´s protein information to STRINGid´s
+  
+  #Plotting the subnetwork
+  string_db$plot_network(Proteins_connected_to_Stat5b$STRING_id)
+  
+  #providing my link
+  link <- string_db$get_link(Proteins_connected_to_Stat5b$STRING_id) #Provides link to the STRINGdb page
+  
+  #Providing the pathways
+  pathways <- string_db$get_enrichment(Proteins_connected_to_Stat5b, category = "KEGG")
+
+  return(list(Proteins_connected_to_Stat5b, pathways, link))
+  
+  remove(get,ghi,hg,mat)
+   }
+
+## Less stringent parameter to determine the Proteins that interact with Stat5
+subnetwork_less_stringent <- subnetworks(data_h = hits_low$STRING_id, score_h = 1) #Using function
+#Sub-setting the returned list into original dataframes + link
+Proteins_connected_to_Stat5b_less <- subnetwork_less_stringent[[1]]
+pathways_less <- subnetwork_less_stringent[[2]]
+Link_less <- subnetwork_less_stringent[[3]]
+Link_less #Link to website
+invisible(string_db_low$get_png(Proteins_connected_to_Stat5b_less$STRING_id, file = "~/phosphoproteomics_project/results/Network_Stat5_less.png")) #Saving png
+
+## More stringent parameter to determine the Proteins that interact with Stat5
+subnetwork_more_stringent <- subnetworks(data_h = hits_high$STRING_id, score_h = 200) #Using function
+#Sub-setting the returned list into original dataframes + link
+Proteins_connected_to_Stat5b_more <- subnetwork_more_stringent[[1]] 
+pathways_more <- subnetwork_more_stringent[[2]]
+Link_more <- subnetwork_more_stringent[[3]]
+Link_more #Link to website 
+invisible(string_db_high$get_png(Proteins_connected_to_Stat5b_more$STRING_id, file = "~/phosphoproteomics_project/results/Network_Stat5_more.png")) #Saving png
+
+
 ```
+***
+#### Printing Pathways
 
-#### Identifying Pathways
-
-```{r}
+```{r paged.print=FALSE}
 #Identifying only for Proteins connected to Stat5b
-enrichment <- string_db$get_enrichment(Proteins_connected_to_Stat5b_quick_way, category = "KEGG")
-print(enrichment[,c(3,4,10)])
+#Table for less stringent parameters
+print(pathways_less[1:5,c(3,4,10)])
+#Table for more stringent parameters
+print(pathways_more[1:5,c(3,4,10)])
+#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
+enrichment <- string_db_high$get_enrichment(more_phosphorylated, category = "KEGG")
+print(enrichment[1:5,c(3,4,10)])
+#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 1.
+enrichment <- string_db_low$get_enrichment(more_phosphorylated, category = "KEGG")
+print(enrichment[1:5,c(3,4,10)])
 
-#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05.
-enrichment <- string_db$get_enrichment(more_phosphorylated, category = "KEGG")
-print(enrichment[,c(3,4,10)])
-
+remove(enrichment)
 ```
-
+***
