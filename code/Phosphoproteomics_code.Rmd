@@ -132,51 +132,34 @@ remove(phospho, Mapping_phospho, string_db_volcano)
 
 #### Subsetting data_phospho for ratio values >= 2
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
-- Here just the data.frame is subset
+- Here just the data.frame is subset, selecting only Ratios >= 2 and p-values <= 0.05
 
 ```{r}
-more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
-more_phosphorylated <- subset.data.frame(more_phosphorylated, subset = more_phosphorylated$Abudance.pvalue <= 0.05)
+more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2) #Filters out all ratios below 2-fold
+more_phosphorylated <- subset.data.frame(more_phosphorylated, subset = more_phosphorylated$Abudance.pvalue <= 0.05) # Filters out all non-significant p-values
 remove(data_phospho)
 ```
 
 #### Building network map of the proteins
 
 ```{r}
-string_db <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
-hits <- string_db$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = TRUE) #mapping the UNIPROT Ids from the first column to get STRING identifiers
-string_db$plot_network(hits$STRING_id) #plotting network
-string_db$get_png(hits$STRING_id, file = "~/phosphoproteomics_project/results/Network.png") #Saving photo
+##Lower score_threshold, allowing more connections
+string_db_low <- STRINGdb$new(version="11.0b", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
+hits_low <- string_db_low$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = F) #mapping the UNIPROT Ids from the first column to get STRING identifiers
+
+string_db_low$plot_network(hits_low$STRING_id) #plotting network
+string_db_low$get_png(hits_low$STRING_id, file = "~/phosphoproteomics_project/results/Network_low.png") #Saving photo
+
+##Higher score_threshold, allowing less connections
+string_db_high <- STRINGdb$new(version="11.0b", species=10090, score_threshold=200, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
+hits_high <- string_db_high$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = F) #mapping the UNIPROT Ids from the first column to get STRING identifiers
+
+string_db_high$plot_network(hits_high$STRING_id) #plotting network
+string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomics_project/results/Network_high.png") #Saving photo
 ```
 
-#### How to identify the Proteins Stat5b is connected to
 
-```{r}
-old_start <- Sys.time()
-#P42232 is Uniprot identifier for mouse Stat5b
-i <- grep("P42232", hits$Master.Protein.Accessions)
-Stat5b <- string_db$mp("P42232") #mapping the UNIPROT Ids 
-vectori <- hits$STRING_id
-i <- string_db$get_interactions(vectori)
-Stat5b_interactions_from <- grep(Stat5b, i$from)
-from_count <- length(Stat5b_interactions_from) #Counting elements in vector to later choose just the entries containing the protein.
-Stat5b_interactions_to <- grep(Stat5b, i$to)
-to_count <- length(Stat5b_interactions_to) #Counting elements again
-Stat5b_interactions <- c(Stat5b_interactions_from, Stat5b_interactions_to) # Combines all the the rows with Stat5b in the path
-Stat5b_interactions <- i[c(Stat5b_interactions),] # Selects only rows with Stat5b in the from or to interaction column
-Stat5b_interactions_protein <- c(Stat5b_interactions[c(1:from_count),2], Stat5b_interactions[c(from_count:(to_count+from_count)),1]) #Takes only the non Stat5b proteins
-Stat5b_interactions_protein <- unique(Stat5b_interactions_protein) #Takes only unique proteins
-gh <- data.frame(matrix(ncol = 1, nrow = 10)) #Making empty data frame
-gh <- as.data.frame(Stat5b_interactions_protein) #Filling it with our proteins
-names(gh)[1] <- "STRING_id" #Renaming column so that add_protein_description recognises it
-Proteins_connected_to_Stat5b <- string_db$add_proteins_description(gh) #Add´s protein information to STRINGid´s 
-old_end <- Sys.time()
-old_end-old_start
-string_db$plot_network(Proteins_connected_to_Stat5b$STRING_id)
-remove(gh, i, Stat5b_interactions, from_count, old_end, old_start, Stat5b_interactions_protein , Stat5b, Stat5b_interactions_from, Stat5b_interactions_to, to_count, vectori)
-```
-
-#### Quicker way to identify the Proteins Stat5b is connected to.
+#### Way to identify the Proteins Stat5b is connected to.
 - There is also a link to the [STRINGdb website](https://version-11-0b.string-db.org/cgi/link?to=8602E81F655D156B) with the Proteins connected to Stat5b in this dataset.
 
 ```{r}
@@ -207,7 +190,13 @@ link #Provides ling to the STRINGdb page
 #### Identifying Pathways
 
 ```{r}
+#Identifying only for Proteins connected to Stat5b
 enrichment <- string_db$get_enrichment(Proteins_connected_to_Stat5b_quick_way, category = "KEGG")
 print(enrichment[,c(3,4,10)])
+
+#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05.
+enrichment <- string_db$get_enrichment(more_phosphorylated, category = "KEGG")
+print(enrichment[,c(3,4,10)])
+
 ```
 
