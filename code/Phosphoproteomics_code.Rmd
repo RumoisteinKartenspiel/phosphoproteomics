@@ -85,9 +85,11 @@ df_copy[] <- lapply(df_copy, function(x) as.numeric(as.character(x)))
 df_copy$pValues <- apply(df_copy, 1, function(x) t.test(x[10:12],x[13:15], alternative = "less", paired = F)$p.value)
 end_alice <- Sys.time()
 end_alice-start_alice #Proves that apply is x4 faster then loop
-remove(end_alice,end_for,start_alice,start_for,row,p_value)
+remove(end_alice,end_for,start_alice,start_for,row,p_value, df_copy)
 ```
+
 ####Adding a Volcano plot to explore the initial data
+
 ```{r}
 ### Phospho volcano plot
 # Calculate LIF/Control ratio
@@ -101,7 +103,7 @@ phospho$diffexpressed[phospho$log2_FC < -1 & phospho$Abudance.pvalue < 0.05] <- 
 phospho$delabel <- NA
 phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessions[phospho$diffexpressed != "NO"]
 
-##Addition to Alices code to generate "real names" not Uniprot IDs
+##Addition to generate "real names" not Uniprot IDs
 string_db_volcano <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="")
 Mapping_phospho <- string_db_volcano$map(phospho, "delabel", removeUnmappedRows = F)
 Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s 
@@ -120,19 +122,22 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   theme_minimal()+
   geom_vline(xintercept=c(-1, 1), col="red") +
   geom_hline(yintercept=-log10(0.05), col="red") + 
-  coord_cartesian(xlim = c(1,3.5), ylim = c(1.25, 6))+
+  coord_cartesian(xlim = c(1,3.5), ylim = c(0.5, 6))+
   geom_label_repel()
 
 ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
-```
 
+remove(phospho, Mapping_phospho, string_db_volcano)
+```
 
 #### Subsetting data_phospho for ratio values >= 2
 - a. Remove peptides without quantitative values -> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
+- Here just the data.frame is subset
 
 ```{r}
 more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2)
-remove(df_copy,data_phospho)
+more_phosphorylated <- subset.data.frame(more_phosphorylated, subset = more_phosphorylated$Abudance.pvalue <= 0.05)
+remove(data_phospho)
 ```
 
 #### Building network map of the proteins
