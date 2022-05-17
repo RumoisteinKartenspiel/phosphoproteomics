@@ -7,14 +7,14 @@ output: html_notebook
 #### Download raw data from Uppmax
 
 ```{bash}
-rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
+#rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 ***
 #### Setting working directory and libraries
 
 ```{r}
 setwd("~/phosphoproteomics_project")
-RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr") 
+RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr","ggplot2","ggrepel") 
 #Installs packages if not yet installed
 for (i in RequiredPackages) { 
     if (!require(i, character.only = TRUE)) 
@@ -27,7 +27,9 @@ library(tidyr)
 library(dplyr)
 library(igraph)
 library(STRINGdb)
-
+library(ggplot2)
+library(ggrepel)
+remove(RequiredPackages)
 ```
 ***
 #### Load raw data and change default separator to ";"
@@ -129,6 +131,22 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
 
 ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
 
+### Proteome volcano plot
+# Defining function first
+volcano_plot_proteome <- function(proteome){
+proteome$log2_FC <- log2(proteome$Abundance.Ratio...LIF.....Control.)
+proteome$diffexpressed <- "NO"
+proteome$diffexpressed[proteome$log2_FC > 1 & proteome$Abundance.Ratio.P.Value...LIF.....Control. < 0.05] <- "UP"
+proteome$diffexpressed[proteome$log2_FC < -1 & proteome$Abundance.Ratio.P.Value...LIF.....Control. < 0.05] <- "DOWN"
+
+ggplot(data=proteome, aes(x=log2_FC, y=-log10(Abundance.Ratio.P.Value...LIF.....Control.), col=diffexpressed))+
+  geom_point()+
+  theme_minimal()+
+  geom_vline(xintercept=c(-1, 1), col="red") +
+  geom_hline(yintercept=-log10(0.05), col="red")
+}
+#Printing the volcano plot
+volcano_plot_proteome(raw_data_proteom)
 remove(phospho, Mapping_phospho, string_db_volcano)
 ```
 ***
@@ -137,9 +155,35 @@ remove(phospho, Mapping_phospho, string_db_volcano)
 - Here just the data.frame is subset, selecting only Ratios >= 2 and p-values <= 0.05
 
 ```{r}
-more_phosphorylated <- subset.data.frame(data_phospho, subset = data_phospho$Abudance.Ratio >= 2) #Filters out all ratios below 2-fold
-more_phosphorylated <- subset.data.frame(more_phosphorylated, subset = more_phosphorylated$Abudance.pvalue <= 0.05) # Filters out all non-significant p-values
-remove(data_phospho)
+##Filter NA out in proteome, Filter out p.values that are non significant(not adjusted)
+
+df_phospho = data_phospho
+df_proteome = raw_data_proteom
+  
+## Filter PHOSPHO
+  more_phospho <- subset.data.frame(df_phospho, subset = df_phospho$Abudance.Ratio >= 2) #Filters out all ratios below 2-fold
+  more_phospho <- subset.data.frame(more_phospho, subset = more_phospho$Abudance.pvalue <= 0.05) #Filters out all non-significant p-values
+  
+  ##Filter PROTEOME
+  exclude_proteome <- filter(df_proteome, df_proteome$Abundance.Ratio.P.Value...LIF.....Control. <= 0.05 & df_proteome$Abundance.Ratio...LIF.....Control. >= 1) #Filters out all significant p-values, because significant p-values indicate an 
+  #Data that we want to exclude, testing if the right data is selected with the volcano plot
+  volcano_plot_proteome(exclude_proteome)
+  #Anti_join anti_join() return all rows from x without a match in y. 
+  more_proteome <- anti_join(df_proteome, exclude_proteome, by = c("Accession" = "Accession"))
+  more_proteome <- filter(more_proteome, more_proteome$Abundance.Ratio...LIF.....Control. <= 2)
+  #Checking the if the right data is excluded
+  volcano_plot_proteome(more_proteome)
+  
+  #Inner join works too, but semi join is better becasue the proteome columns are not included into the resulting data frame.
+  #more_phosphorylated <- dplyr::inner_join( more_phospho, more_proteome, by = c("Master.Protein.Accessions" = "Accession"))
+  
+  #Semi-join #semi_join() return all rows from x with a match in y. 
+  more_phosphorylated <- dplyr::semi_join(more_phospho, more_proteome, by = c("Master.Protein.Accessions" = "Accession"))
+  
+
+
+
+remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
 ```
 ***
 #### Building network map of the proteins
@@ -162,8 +206,8 @@ string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomics_project/
 
 ***
 #### Way to identify the Proteins Stat5b is connected to.
-- There is also a link to the [STRINGdb website for less stringent threshold = 1 ](https://version-11-0b.string-db.org/cgi/link?to=8602E81F655D156B) with the Proteins connected to Stat5b in this dataset.
-- There is also a link to the [STRINGdb website for more stringent threshold = 200 ](https://version-11-0b.string-db.org/cgi/link?to=57B67172C2751CB6) with the Proteins connected to Stat5b in this dataset.
+- There is also a link to the [STRINGdb website for less stringent threshold = 1 ](https://version-11-0b.string-db.org/cgi/link?to=2AE339B7E8089CA3) with the Proteins connected to Stat5b in this dataset.
+- There is also a link to the [STRINGdb website for more stringent threshold = 200 ](https://version-11-0b.string-db.org/cgi/link?to=38BC613D55C2F293) with the Proteins connected to Stat5b in this dataset.
 
 ```{r}
 #Finding String id identifier for Stat5b and assigning it to the a variable
@@ -235,6 +279,6 @@ print(enrichment[1:5,c(3,4,10)])
 enrichment <- string_db_low$get_enrichment(more_phosphorylated, category = "KEGG")
 print(enrichment[1:5,c(3,4,10)])
 
-remove(enrichment)
+remove(enrichment,i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho)
 ```
 ***
