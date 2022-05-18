@@ -110,11 +110,16 @@ remove(end_alice,end_for,start_alice,start_for,row,p_value, df_copy)
 
 #### Adding a Volcano plot to explore the initial data
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ### Phospho volcano plot
+string_db_volcano <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="")
+
+#Defining function to plot data
+
+volcano_phospho_plot <- function(phospho, number){
+
 # Calculate LIF/Control ratio
-phospho <- data_phospho
-phospho$FC <- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control
+phospho$FC <- phospho$Abudance.Mean.LIF / phospho$Abudance.Mean.Control
 phospho$log2_FC <- log2(phospho$FC)
 phospho$diffexpressed <- "NO"
 phospho$diffexpressed[phospho$log2_FC > 1 & phospho$Abudance.pvalue < 0.05] <- "UP"
@@ -124,7 +129,6 @@ phospho$delabel <- NA
 phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessions[phospho$diffexpressed != "NO"]
 
 ##Addition to generate "real names" not Uniprot IDs
-string_db_volcano <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="")
 Mapping_phospho <- string_db_volcano$map(phospho, "delabel", removeUnmappedRows = F)
 Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s 
 #Volcano plot overview
@@ -133,9 +137,14 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   theme_minimal()+
   geom_vline(xintercept=c(-1, 1), col="red") +
   geom_hline(yintercept=-log10(0.05), col="red")
+#saves the correct photo for both possible input tabels
 
-ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano.png", width = 1500, height = 1000, units = "px")
-
+if (number == 1) {
+  ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano.png", width = 1500, height = 1000, units = "px")
+}
+if (number == 2) {
+  ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano_for_more_phosphrylated_after_qc_and_filter.png", width = 1500, height = 1000, units = "px")
+}
 #Detail/Zoomed in
 ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffexpressed, label=preferred_name))+
   geom_point()+
@@ -145,9 +154,30 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   coord_cartesian(xlim = c(1,3.5), ylim = c(0.5, 6))+
   geom_label_repel()
 
-ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
+#saves the correct photo for both possible input tabels
+
+if (number == 1) {
+  ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
+}
+if (number == 2) {
+ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano_for_more_phosphrylated_after_qc_and_filter.png", width = 1500, height = 1000, units = "px")
+}
+}
+
+volcano_phospho_plot(data_phospho, 1)
+
+
+```
+
+![Overwiev Volcano Phosho](images/Zoomed_out_Volcano.png)
+
+![Zoomed in Volcano plot Phospho](images/Zoomed_in_Volcano.png)
+
+------------------------------------------------------------------------
 
 ### Proteome volcano plot
+
+```{r}
 # Defining function first
 volcano_plot_proteome <- function(proteome){
 proteome$log2_FC <- log2(proteome$Abundance.Ratio...LIF.....Control.)
@@ -163,7 +193,6 @@ ggplot(data=proteome, aes(x=log2_FC, y=-log10(Abundance.Ratio.P.Value...LIF.....
 }
 #Printing the volcano plot
 volcano_plot_proteome(raw_data_proteom)
-remove(phospho, Mapping_phospho, string_db_volcano)
 ```
 
 ------------------------------------------------------------------------
@@ -176,7 +205,7 @@ remove(phospho, Mapping_phospho, string_db_volcano)
 
 -   Here just the data.frame is subset, selecting only Ratios \>= 2 and p-values \<= 0.05
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 ##Filter NA out in proteome, Filter out p.values that are non significant(not adjusted)
 
 df_phospho = data_phospho
@@ -192,7 +221,7 @@ df_proteome = raw_data_proteom
   volcano_plot_proteome(exclude_proteome)
   #Anti_join anti_join() return all rows from x without a match in y. 
   more_proteome <- anti_join(df_proteome, exclude_proteome, by = c("Accession" = "Accession"))
-  more_proteome <- filter(more_proteome, more_proteome$Abundance.Ratio...LIF.....Control. <= 2)
+  more_proteome <- filter(more_proteome, more_proteome$Abundance.Ratio...LIF.....Control. <= 2) # removes outliers with ratio bigger then 2
   #Checking the if the right data is excluded
   volcano_plot_proteome(more_proteome)
   
@@ -201,11 +230,23 @@ df_proteome = raw_data_proteom
   
   #Semi-join #semi_join() return all rows from x with a match in y. 
   more_phosphorylated <- dplyr::semi_join(more_phospho, more_proteome, by = c("Master.Protein.Accessions" = "Accession"))
+  volcano_phospho_plot(more_phosphorylated, 2) # to control remaining data
   
 remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
+
 ```
 
 ------------------------------------------------------------------------
+
+#### Comparing data before and after the cleanup
+
+------------------------------------------------------------------------
+
+#### ![Volcano of data_phospho before filter](images/Zoomed_in_Volcano-01.png){width="350"}![Zoomed in Volcano from more phosphorylated after filter](images/Zoomed_in_Volcano_for_more_phosphrylated_after_qc_and_filter.png){width="350"}
+
+------------------------------------------------------------------------
+
+#### 
 
 #### Building network map of the proteins
 
@@ -315,7 +356,7 @@ factor_function(Big_network_pathways_more)
 Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
 factor_function(Big_network_pathways_less)
 
-remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function)
+remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
 ```
 
 ------------------------------------------------------------------------
