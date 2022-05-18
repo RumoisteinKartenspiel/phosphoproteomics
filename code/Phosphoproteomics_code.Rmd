@@ -8,7 +8,8 @@ output: html_notebook
 #### Download raw data from Uppmax
 
 ```{bash}
-rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
+
+#rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 
 ------------------------------------------------------------------------
@@ -292,18 +293,29 @@ invisible(string_db_high$get_png(Proteins_connected_to_Stat5b_more$STRING_id, fi
 
 ```{r paged.print=TRUE}
 #Identifying only for Proteins connected to Stat5b
-#Table for less stringent parameters
-print.data.frame(pathways_less[1:5,c(3,4,10)], row.names = F)
-#Table for more stringent parameters
-print.data.frame(pathways_more[1:5,c(3,4,10)], row.names = F)
-#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
-enrichment <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
-print.data.frame(enrichment[1:5,c(3,4,10)], row.names = F)
-#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 1.
-enrichment <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
-print.data.frame(enrichment[1:5,c(3,4,10)], row.names = F)
 
-remove(enrichment,i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho)
+#Function to generate tabels based on factor gene counts / number of annotated genes.
+factor_function <- function(Pathway){
+i = 1
+for (i in i:nrow(Pathway)) {
+  Pathway$factor[i] <- round((Pathway[i,3]/Pathway[i,4]), digits = 3) #rounded for better visualization
+}
+Pathway <- rename(Pathway, genes_in_background = number_of_genes_in_background)
+Pathway <- Pathway[order(Pathway$factor,decreasing = T ),]
+return(print.data.frame(Pathway[1:5,c(11,3,4,10)], row.names = F))
+}
+#Table for less stringent parameters
+factor_function(pathways_less)
+#Table for more stringent parameters
+factor_function(pathways_more)
+#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
+Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
+factor_function(Big_network_pathways_more)
+#Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 1.
+Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
+factor_function(Big_network_pathways_less)
+
+remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function)
 ```
 
 ------------------------------------------------------------------------
