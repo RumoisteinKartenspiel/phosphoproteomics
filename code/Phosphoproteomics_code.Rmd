@@ -341,9 +341,10 @@ i = 1
 for (i in i:nrow(Pathway)) {
   Pathway$factor[i] <- round((Pathway[i,3]/Pathway[i,4]), digits = 3) #rounded for better visualization
 }
-Pathway <- rename(Pathway, genes_in_background = number_of_genes_in_background)
+Pathway <- rename(Pathway, background = number_of_genes_in_background)
+Pathway <- rename(Pathway, hits = number_of_genes)
 Pathway <- Pathway[order(Pathway$factor,decreasing = T ),]
-return(print.data.frame(Pathway[1:5,c(11,3,4,10)], row.names = F))
+return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
 }
 #Table for less stringent parameters
 factor_function(pathways_less)
