@@ -14,9 +14,9 @@ output: html_notebook
 
 ------------------------------------------------------------------------
 
-#### Setting working directory and libraries
+#### Setting working directory and install libraries
 
-```{r, warning=FALSE, results='hide'}
+```{r message=FALSE, warning=FALSE, results='hide'}
 setwd("~/phosphoproteomics_project")
 RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr","ggplot2","ggrepel") 
 #Installs packages if not yet installed
@@ -38,7 +38,8 @@ remove(RequiredPackages)
 
 ------------------------------------------------------------------------
 
-#### Load raw data and change default separator to ";"
+#### Load raw data 
+- Change default separator to ";"
 
 ```{r}
 raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
@@ -64,7 +65,7 @@ for (i in Abundance_columns) {
 
 #### Calculate Mean for Abundance and adding it as column and Ratio LIF/Control
 
--   grep again Abundance but this time the Control and LIF (case) seperatly.
+-   grep again Abundance but this time the Control and LIF (case) separately.
 -   calculate row means each and the ration between the means.
 
 ```{r}
@@ -83,7 +84,7 @@ remove(Abundance_columns, i)
 
 #### Calculate p-values
 
--   *t.test* to compare all 3 Control \<-\> 3 Case values. If they are different then the pvalue \< 0.05 **-\>** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value \~ 0.7 (really bad) also indicating no difference.
+-   *t.test* to compare all 3 Control \<-\> 3 Case values. If they are different then the pvalue \< 0.05 **-\>** indicating a real differences between case & control. If p-value is big the difference is by chance😄 I tried it for row 188 which has a Ration nearly equal to 1 (1.02...) indicating no difference in case vs. control and the p value \~ 0.7 (really bad) also indicating no difference. The for loop iterates it over all rows, Alices quicker approach uses the apply function that allows parallel iteration making it quicker.
 
 ```{r warning=FALSE}
 start_for <- Sys.time()
@@ -109,12 +110,15 @@ remove(end_alice,end_for,start_alice,start_for,row,p_value, df_copy)
 ------------------------------------------------------------------------
 
 #### Adding a Volcano plot to explore the initial data
+- The main idea is to identify thresholds that can be used to clean the raw data. 
 
 ```{r message=FALSE, warning=FALSE}
 ### Phospho volcano plot
 string_db_volcano <- STRINGdb$new( version="11.0b", species=10090, score_threshold=1, input_directory="")
+# This had to be outside the volcano_phospho_plot function, because the function didnt return the string_db_volcano function that is needed also afterwards.
 
-#Defining function to plot data
+# Defining function to plot data
+    # Makes the whole code easy to reuse.
 
 volcano_phospho_plot <- function(phospho, number){
 
@@ -122,25 +126,26 @@ volcano_phospho_plot <- function(phospho, number){
 phospho$FC <- phospho$Abudance.Mean.LIF / phospho$Abudance.Mean.Control
 phospho$log2_FC <- log2(phospho$FC)
 phospho$diffexpressed <- "NO"
-phospho$diffexpressed[phospho$log2_FC > 1 & phospho$Abudance.pvalue < 0.05] <- "UP"
-phospho$diffexpressed[phospho$log2_FC < -1 & phospho$Abudance.pvalue < 0.05] <- "DOWN"
+phospho$diffexpressed[phospho$log2_FC > 1 & phospho$Abudance.pvalue < 0.05] <- "UP" # sorts out upregulated phospo values and assigns "UP" value.
+phospho$diffexpressed[phospho$log2_FC < -1 & phospho$Abudance.pvalue < 0.05] <- "DOWN" # same or downregulated phospho values
 
 phospho$delabel <- NA
-phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessions[phospho$diffexpressed != "NO"]
+phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessions[phospho$diffexpressed != "NO"] # selecting only up or down regulated values and assigning them to the label column.
 
 ##Addition to generate "real names" not Uniprot IDs
 Mapping_phospho <- string_db_volcano$map(phospho, "delabel", removeUnmappedRows = F)
-Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s 
+Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s = preferred names are more human readable
+
 #Volcano plot overview
 ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffexpressed, label=preferred_name))+
   geom_point()+
   theme_minimal()+
   geom_vline(xintercept=c(-1, 1), col="red") +
   geom_hline(yintercept=-log10(0.05), col="red")
-#saves the correct photo for both possible input tabels
-
+#saves the correct photo for both possible input tables
+# number 1 or 2 has to be defined in the function input data. This is a bit clumsy solved, but there were problems with returning more than one plot out of a function.
 if (number == 1) {
-  ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano.png", width = 1500, height = 1000, units = "px")
+  ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano.png", width = 1500, height = 1000, units = "px") # Saves plots with defined size
 }
 if (number == 2) {
   ggsave("~/phosphoproteomics_project/results/Zoomed_out_Volcano_for_more_phosphrylated_after_qc_and_filter.png", width = 1500, height = 1000, units = "px")
@@ -154,7 +159,7 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   coord_cartesian(xlim = c(1,3.5), ylim = c(0.5, 6))+
   geom_label_repel()
 
-#saves the correct photo for both possible input tabels
+#saves the correct photo for both possible input tables
 
 if (number == 1) {
   ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
@@ -164,7 +169,7 @@ ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano_for_more_phosphryl
 }
 }
 
-volcano_phospho_plot(data_phospho, 1)
+volcano_phospho_plot(data_phospho, 1) #plots data to control
 
 
 ```
@@ -175,7 +180,8 @@ volcano_phospho_plot(data_phospho, 1)
 
 ------------------------------------------------------------------------
 
-### Proteome volcano plot
+#### Proteome volcano plot
+- Also plotting the proteome data to identify thresholds to clean data
 
 ```{r}
 # Defining function first
@@ -192,8 +198,10 @@ ggplot(data=proteome, aes(x=log2_FC, y=-log10(Abundance.Ratio.P.Value...LIF.....
   geom_hline(yintercept=-log10(0.05), col="red")
 }
 #Printing the volcano plot
-volcano_plot_proteome(raw_data_proteom)
+volcano_plot_proteome(raw_data_proteom) # Plots all the data 
+
 ```
+- No values are significantly up or down regulated (defining up / down regulated as at least 2-fold increase/decrease). Also outliers could be observed (4 vales with a >2-fold increase with non-significant p-values). To be more restrictive and decrease the change of false positives in the upcoming analysis, also significantly increased values with a ratio > 1 were selected as undesired data and are going to be removed in the following cleaning steps.
 
 ------------------------------------------------------------------------
 
@@ -203,11 +211,12 @@ volcano_plot_proteome(raw_data_proteom)
 
     a.  Remove peptides without quantitative values -\> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 
--   Here just the data.frame is subset, selecting only Ratios \>= 2 and p-values \<= 0.05
+-   Here we use the identified thresholds from the volcano plots to clean the data. First we select rows with ratio >= 2 and p.values <= 0.05 from the phopho dataset. From the proteom data set values were selected with a all rows with a ratio <= 1, all rows with a ratio >= 1 >= 2 and p.value >= 0.05 (significant p-values are excluded and ratios > bigger than 2 too). After this initial cleanup a semi_join() was performed return all rows from cleanup phospho with a match in cleanup proteome, to select only phospo values that showed increased phosphorylation due to the LIF treatment.
+- volcano plots were used to visualize the cleaning/selecting steps 
 
 ```{r message=FALSE, warning=FALSE}
 ##Filter NA out in proteome, Filter out p.values that are non significant(not adjusted)
-
+  #securing no overwrite to original data
 df_phospho = data_phospho
 df_proteome = raw_data_proteom
   
@@ -239,6 +248,7 @@ remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
 ------------------------------------------------------------------------
 
 #### Comparing data before and after the cleanup
+-we could identify that the cleanup was conducted and not too stringent returning enough data to conduct analyisis on.
 
 ------------------------------------------------------------------------
 
@@ -249,6 +259,7 @@ remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
 #### 
 
 #### Building network map of the proteins
+- With help of the STRINgdb package the overview networks were produced with different thresholds.
 
 ```{r}
 ##Lower score_threshold, allowing more connections
@@ -258,7 +269,7 @@ hits_low <- string_db_low$map(more_phosphorylated, "Master.Protein.Accessions", 
 string_db_low$plot_network(hits_low$STRING_id) #plotting network
 invisible(string_db_low$get_png(hits_low$STRING_id, file = "~/phosphoproteomics_project/results/Network_low.png")) #Saving photo
 
-##Higher score_threshold, allowing less connections
+## Higher score_threshold, allowing less connections
 string_db_high <- STRINGdb$new(version="11.0b", species=10090, score_threshold=200, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
 hits_high <- string_db_high$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = F) #mapping the UNIPROT Ids from the first column to get STRING identifiers
 
@@ -269,6 +280,8 @@ invisible(string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomic
 ------------------------------------------------------------------------
 
 #### Way to identify the Proteins Stat5b is connected to.
+
+- In this chunk we define a function with a more and a less stringent threshold to get 1. Proteins_connected_to_Stat5b for more or less stringent threshold, 2. Network plot for the subnetworks of proteins connected to Stat5b, 3. Link to webpage for the subnetworks, 4. Pathways that are enriched in the subnetworks.
 
 -   There is also a link to the [STRINGdb website for less stringent threshold = 1](https://version-11-0b.string-db.org/cgi/link?to=2AE339B7E8089CA3) with the Proteins connected to Stat5b in this dataset.
 -   There is also a link to the [STRINGdb website for more stringent threshold = 200](https://version-11-0b.string-db.org/cgi/link?to=38BC613D55C2F293) with the Proteins connected to Stat5b in this dataset.
@@ -332,6 +345,8 @@ invisible(string_db_high$get_png(Proteins_connected_to_Stat5b_more$STRING_id, fi
 
 #### Printing Pathways
 
+-printing the enriched pathways from the subnetworks of Stat5b and renaming them for a better human readability & formatting of html document.
+
 ```{r paged.print=TRUE}
 #Identifying only for Proteins connected to Stat5b
 
@@ -343,6 +358,7 @@ for (i in i:nrow(Pathway)) {
 }
 Pathway <- rename(Pathway, background = number_of_genes_in_background)
 Pathway <- rename(Pathway, hits = number_of_genes)
+Pathway <- rename(Pathway, involved_genes = preferredNames)
 Pathway <- Pathway[order(Pathway$factor,decreasing = T ),]
 return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
 }
@@ -358,6 +374,7 @@ Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, ca
 factor_function(Big_network_pathways_less)
 
 remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
+
 ```
 
 ------------------------------------------------------------------------
