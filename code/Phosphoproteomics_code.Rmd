@@ -21,9 +21,10 @@ output: html_notebook
 ------------------------------------------------------------------------
 
 #### Setting working directory and install libraries
+-Please set working directory to the parent directory of the code folder.
 
 ```{r message=FALSE, warning=FALSE, results='hide'}
-setwd("~/phosphoproteomics_project")
+#setwd("~/phosphoproteomics_project") 
 RequiredPackages <- c("BiocManager", "dplyr", "igraph", "tidyr","ggplot2","ggrepel") 
 #Installs packages if not yet installed
 for (i in RequiredPackages) { 
