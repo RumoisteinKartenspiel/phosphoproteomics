@@ -1,3 +1,4 @@
-# Bioinformatic_course_2022_project
-This is the repository to reproduce the results of the Bioinformatics course project 2022. The project_reproduction brach is the main branch for reproducin the code, the master branch contians the newest tryouts.
-The Rnotebook is in the code folder and should be executable within this repositroy, producing an output html report in the code folder and result pictures in the results folder. Raw data is found in the phosphoproteomics folder.
+# bioinformatics_course_2022_project
+This is the repository for reproducing the results of the 2022 Bioinformatics course project. The project_reproduction branch is the main branch for reproducing the code, the master branch contains the latest experiments.
+The Rnotebook is located in the code folder and should be executable within this repository, producing an HTML output report in the code folder and results images in the results folder. The raw data is located in the phosphoproteomics folder.
+The code folder contains also an image folder, created by the html creator contianing added pictures for the report.
