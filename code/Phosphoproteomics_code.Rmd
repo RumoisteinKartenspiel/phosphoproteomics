@@ -345,7 +345,7 @@ Pathway <- rename(Pathway, background = number_of_genes_in_background)
 Pathway <- rename(Pathway, hits = number_of_genes)
 Pathway <- rename(Pathway, involved_genes = preferredNames)
 Pathway <- Pathway[order(Pathway$factor,decreasing = T ),]
-return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
+return(print.data.frame(Pathway[1:nrow(Pathway),c(11,3,4,10,7)], row.names = F))
 }
 #Table for less stringent parameters
 factor_function(pathways_less)
