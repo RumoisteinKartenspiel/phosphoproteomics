@@ -384,7 +384,7 @@ remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volc
 -   Also, possibly a reproduction of the dataset containing more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
 
 #### Reproducibility
--   This project has a GitHub repository and the Rnotebook is written so that it can be executed with the downloaded repository.
+-   This project has a [GitHub repository](https://github.com/RumoisteinKartenspiel/phosphoproteomics.git) and the Rnotebook is written so that it can be executed with the downloaded repository.
 
 ------------------------------------------------------------------------
 
