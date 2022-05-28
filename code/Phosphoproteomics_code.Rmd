@@ -1,8 +1,6 @@
 ---
 title: "Phosphoproteomics"
-output:
-  pdf_document: default
-  html_notebook: default
+output: html_notebook
 ---
 
 ------------------------------------------------------------------------
@@ -17,7 +15,6 @@ output:
 #### Download raw data from Uppmax
 
 ```{bash}
-
 #rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 
@@ -52,8 +49,8 @@ remove(RequiredPackages)
 -   Change default separator to ";"
 
 ```{r}
-raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
-raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
+raw_data_phospho <- read.csv(file = "~/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
+raw_data_proteom <- read.csv(file = "~/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
 ```
 
 ------------------------------------------------------------------------
@@ -81,12 +78,9 @@ for (i in Abundance_columns) {
 ```{r}
 Abundance_columns <- grep("Abundance.Control", colnames(data_phospho))
 data_phospho$Abudance.Mean.Control <- rowMeans(data_phospho[,c(Abundance_columns)])
-
 Abundance_columns <- grep("Abundance.LIF", colnames(data_phospho))
 data_phospho$Abudance.Mean.LIF <- rowMeans(data_phospho[,c(Abundance_columns)])
-
 data_phospho$Abudance.Ratio <- data_phospho$Abudance.Mean.LIF / data_phospho$Abudance.Mean.Control
-
 remove(Abundance_columns, i)
 ```
 
@@ -106,7 +100,6 @@ for (row in 1:nrow(data_phospho)) {
   }
 end_for <- Sys.time()
 end_for - start_for #We wanted to compare calculation time to compare the methods
-
 #Alice quicker approach
 df_copy <- dplyr::tibble(data_phospho) # Copy df
 start_alice <- Sys.time()
@@ -127,26 +120,20 @@ remove(end_alice,end_for,start_alice,start_for,row,p_value, df_copy)
 ### Phospho volcano plot
 string_db_volcano <- STRINGdb$new( version="11.5", species=10090, score_threshold=1, input_directory="")
 # This had to be outside the volcano_phospho_plot function, because the function didnt return the string_db_volcano function that is needed also afterwards.
-
 # Defining function to plot data
     # Makes the whole code easy to reuse.
-
 volcano_phospho_plot <- function(phospho, number){
-
 # Calculate LIF/Control ratio
 phospho$FC <- phospho$Abudance.Mean.LIF / phospho$Abudance.Mean.Control
 phospho$log2_FC <- log2(phospho$FC)
 phospho$diffexpressed <- "NO"
 phospho$diffexpressed[phospho$log2_FC > 1 & phospho$Abudance.pvalue < 0.05] <- "UP" # sorts out upregulated phospo values and assigns "UP" value.
 phospho$diffexpressed[phospho$log2_FC < -1 & phospho$Abudance.pvalue < 0.05] <- "DOWN" # same or downregulated phospho values
-
 phospho$delabel <- NA
 phospho$delabel[phospho$diffexpressed != "NO"] <- phospho$Master.Protein.Accessions[phospho$diffexpressed != "NO"] # selecting only up or down regulated values and assigning them to the label column.
-
 ##Addition to generate "real names" not Uniprot IDs
 Mapping_phospho <- string_db_volcano$map(phospho, "delabel", removeUnmappedRows = F)
 Mapping_phospho <- string_db_volcano$add_proteins_description(Mapping_phospho) #Add´s protein information to STRINGid´s = preferred names are more human readable
-
 #Volcano plot overview
 ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffexpressed, label=preferred_name))+
   geom_point()+
@@ -169,9 +156,7 @@ ggplot(data=Mapping_phospho, aes(x=log2_FC, y=-log10(Abudance.pvalue), col=diffe
   geom_hline(yintercept=-log10(0.05), col="red") + 
   coord_cartesian(xlim = c(1,3.5), ylim = c(0.5, 6))+
   geom_label_repel()
-
 #saves the correct photo for both possible input tables
-
 if (number == 1) {
   ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano.png", width = 1500, height = 1000, units = "px")
 }
@@ -179,10 +164,7 @@ if (number == 2) {
 ggsave("~/phosphoproteomics_project/results/Zoomed_in_Volcano_for_more_phosphrylated_after_qc_and_filter.png", width = 1500, height = 1000, units = "px")
 }
 }
-
 volcano_phospho_plot(data_phospho, 1) #plots data to control
-
-
 ```
 
 ![Overwiev Volcano Phosho](images/Zoomed_out_Volcano.png)
@@ -202,7 +184,6 @@ proteome$log2_FC <- log2(proteome$Abundance.Ratio...LIF.....Control.)
 proteome$diffexpressed <- "NO"
 proteome$diffexpressed[proteome$log2_FC > 1 & proteome$Abundance.Ratio.P.Value...LIF.....Control. < 0.05] <- "UP"
 proteome$diffexpressed[proteome$log2_FC < -1 & proteome$Abundance.Ratio.P.Value...LIF.....Control. < 0.05] <- "DOWN"
-
 ggplot(data=proteome, aes(x=log2_FC, y=-log10(Abundance.Ratio.P.Value...LIF.....Control.), col=diffexpressed))+
   geom_point()+
   theme_minimal()+
@@ -211,7 +192,6 @@ ggplot(data=proteome, aes(x=log2_FC, y=-log10(Abundance.Ratio.P.Value...LIF.....
 }
 #Printing the volcano plot
 volcano_plot_proteome(raw_data_proteom) # Plots all the data 
-
 ```
 
 -   No values are significantly up or down regulated (defining up / down regulated as at least 2-fold increase/decrease). Also outliers could be observed (4 vales with a \>2-fold increase with non-significant p-values). To be more restrictive and decrease the change of false positives in the upcoming analysis, also significantly increased values with a ratio \> 1 were selected as undesired data and are going to be removed in the following cleaning steps.
@@ -224,7 +204,7 @@ volcano_plot_proteome(raw_data_proteom) # Plots all the data
 
     a.  Remove peptides without quantitative values -\> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 
--   Here we use the identified thresholds from the volcano plots to clean the data. First we select rows with ratio \>= 2 and p.values \<= 0.05 from the phopho dataset. From the proteom data set values were selected with a all rows with a ratio \<= 1, all rows with a ratio \>= 1 \>= 2 and p.value \>= 0.05 (significant p-values are excluded and ratios \> bigger than 2 too). After this initial cleanup a semi_join() was performed return all rows from cleanup phospho with a match in cleanup proteome, to select only phospo values that showed increased phosphorylation due to the LIF treatment.
+-   Here we use the identified thresholds from the volcano plots to clean the data. First we select rows with ratio \>= 2 and p.values \<= 0.05 from the phopho dataset. From the proteom data set values were selected with a all rows with a ratio \<= 1, all rows with a ratio \>= 1 and p.value \<= 0.05 (elevated proteins (ratio \>=1) with significant p-values are excluded and protein with ratios bigger than 2 (disregarding p-value), too). After this initial cleanup a semi_join() was performed returning all rows from cleanup phospho with a match in cleanup proteome, to select only phospo values that showed increased phosphorylation due to the LIF treatment and not due to elevated expression levels.
 
 -   volcano plots were used to visualize the cleaning/selecting steps
 
@@ -256,7 +236,6 @@ df_proteome = raw_data_proteom
   volcano_phospho_plot(more_phosphorylated, 2) # to control remaining data
   
 remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
-
 ```
 
 ------------------------------------------------------------------------
@@ -281,14 +260,11 @@ remove(df_phospho, df_proteome, more_phospho, more_proteome, exclude_proteome)
 ##Lower score_threshold, allowing more connections
 string_db_low <- STRINGdb$new(version="11.5", species=10090, score_threshold=1, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
 hits_low <- string_db_low$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = F) #mapping the UNIPROT Ids from the first column to get STRING identifiers
-
 string_db_low$plot_network(hits_low$STRING_id) #plotting network
 invisible(string_db_low$get_png(hits_low$STRING_id, file = "~/phosphoproteomics_project/results/Network_low.png")) #Saving photo
-
 ## Higher score_threshold, allowing less connections
 string_db_high <- STRINGdb$new(version="11.5", species=10090, score_threshold=200, input_directory="") #species = mouse identifier, score threshold = if one interaction this will be mapped, no input directory data stored only temporary
 hits_high <- string_db_high$map(more_phosphorylated, "Master.Protein.Accessions", removeUnmappedRows = F) #mapping the UNIPROT Ids from the first column to get STRING identifiers
-
 string_db_high$plot_network(hits_high$STRING_id) #plotting network
 invisible(string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomics_project/results/Network_high.png")) #Saving photo
 ```
@@ -307,9 +283,7 @@ invisible(string_db_high$get_png(hits_high$STRING_id, file = "~/phosphoproteomic
 #Finding String id identifier for Stat5b and assigning it to the a variable
 i <- grep("P42232", hits_low$Master.Protein.Accessions) 
 Stat5b <- string_db_low$mp("P42232") #mapping the UNIPROT Ids 
-
 ## Mapping Stat5b interactions in the less stringent data set and more stringent data set
-
 #Defining a function to get 1. Proteins_connected_to_Stat5b, 2. Network plot, 3. Link to webpage, 4. Pathways
 subnetworks <- function(data_h,score_h) {
   #a = The data we want to have a network from, b = the threshold number of the string_db function
@@ -331,12 +305,10 @@ subnetworks <- function(data_h,score_h) {
   
   #Providing the pathways
   pathways <- string_db$get_enrichment(Proteins_connected_to_Stat5b, category = "KEGG")
-
   return(list(Proteins_connected_to_Stat5b, pathways, link))
   
   remove(get,ghi,hg,mat)
    }
-
 ## Less stringent parameter to determine the Proteins that interact with Stat5
 subnetwork_less_stringent <- subnetworks(data_h = hits_low$STRING_id, score_h = 1) #Using function
 #Sub-setting the returned list into original dataframes + link
@@ -345,7 +317,6 @@ pathways_less <- subnetwork_less_stringent[[2]]
 Link_less <- subnetwork_less_stringent[[3]]
 Link_less #Link to website
 invisible(string_db_low$get_png(Proteins_connected_to_Stat5b_less$STRING_id, file = "~/phosphoproteomics_project/results/Network_Stat5_less.png")) #Saving png
-
 ## More stringent parameter to determine the Proteins that interact with Stat5
 subnetwork_more_stringent <- subnetworks(data_h = hits_high$STRING_id, score_h = 200) #Using function
 #Sub-setting the returned list into original dataframes + link
@@ -354,8 +325,6 @@ pathways_more <- subnetwork_more_stringent[[2]]
 Link_more <- subnetwork_more_stringent[[3]]
 Link_more #Link to website 
 invisible(string_db_high$get_png(Proteins_connected_to_Stat5b_more$STRING_id, file = "~/phosphoproteomics_project/results/Network_Stat5_more.png")) #Saving png
-
-
 ```
 
 ------------------------------------------------------------------------
@@ -366,7 +335,6 @@ invisible(string_db_high$get_png(Proteins_connected_to_Stat5b_more$STRING_id, fi
 
 ```{r paged.print=TRUE}
 #Identifying only for Proteins connected to Stat5b
-
 #Function to generate tabels based on factor gene counts / number of annotated genes.
 factor_function <- function(Pathway){
 i = 1
@@ -383,15 +351,14 @@ return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
 factor_function(pathways_less)
 #Table for more stringent parameters
 factor_function(pathways_more)
+## This part does not work with STRINGdb version 11.5, it worked properly with version 11.0b
 #Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
-Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
-factor_function(Big_network_pathways_more)
+#Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
+#factor_function(Big_network_pathways_more)
 #Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 1.
-Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
-factor_function(Big_network_pathways_less)
-
+#Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
+#factor_function(Big_network_pathways_less)
 remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
-
 ```
 
 ------------------------------------------------------------------------
@@ -400,19 +367,24 @@ remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volc
 
 -   Stat5b was picked as the lead target since it showed the highest significant ratio after data clean up in the phospho data set.
 
--   The more stringent parameters turned out less proteins connected to Stat5b/5a but with a higher security of true association. The generated subnetwork for Stat5b showed a very promising target for further investigation, since a real network evolves around Stat5b. Generated pathways to investigate the effect of increased phosphorylation returned many cancer-related pathways indicating a connection between retaining a non-differentiated state in stem cells and the capability of cancerous cells to form cancerous masses. Of the non-cancer pathways JAK-STAT is of most importance since it's also the sub pathway affected in the cancer pathways.
+-   The more stringent parameters turned out less proteins connected to Stat5b/5a but with a higher security of true association. The generated subnetwork for Stat5b showed a very promising target for further investigation, since a network evolved around Stat5b. Generated pathways to investigate the effect of increased phosphorylation returned many cancer-related pathways indicating a connection between retaining a non-differentiated state in stem cells and the capability of cancerous cells to form cancerous masses. Of the non-cancer pathways JAK-STAT is of most importance since it's also the sub pathway affected in the cancer pathways.
 
--   The less stringent parameters turned out more proteins connected to Stat5b/5a but has a higher risk of false positive connections. In the follow up pathway analysis this turned out to be irrelevant, since major contributions to pathways are done by Stat5b/5a that are part of both data sets. This could be seen in the involved_genes section in the data tables. Stat5b forms homo- and hetero dimers especially with the paralog Stat5a. Upon Tyr-phosphorylation they dimerize and translocate into the nucleus takes place where it acts as [transcription factor](https://doi.org/10.1074/jbc.274.32.22484). The more stringent threshold parameter also removed Sos1 from the dataset. Sos1 is involved together with Stat5a/b in most of the enriched pathways in the less stringent dataset. The Ras-Raf_MAPK pathway is regulated by Sos1, normally acting as guanin nucleotide exchange factor [upon Ras](https://doi.org/10.1083/jcb.200103146). Phosphorylation of specific Serin residues have a deactivating effect on Sos1 and is used as negative regulator of the [whole Ras-Raf-MAPK pathway](https://doi.org/10.1042/BJ20120938), a pathway normally associated with [promoting differentiation](https://doi.org/10.1002/jcp.28334). Sos1 is also invovled in the mTOR pathway, together with Akt1s1 (subunit of mTORC1), both also found in the less stringent subnetwork but not the more stringent one.
+    ![JAK-STAT-pathway with Stat5a/5b, Sos1 and Ptpn11 (SHP2) in pink from KEGG, entry [mmu04630](https://www.kegg.jp/kegg-bin/show_pathway?mmu04630).](images/jak-stat_pathway.png)
+
+-   The less stringent parameters turned out more proteins connected to Stat5b/5a but has a higher risk of false positive connections. The most important involved genes were Stat5a/b. Stat5b forms homo- and hetero dimers with the paralog Stat5a. Upon Tyr-phosphorylation they dimerize and translocation into the nucleus takes place, where it acts as [transcription factor](https://doi.org/10.1074/jbc.274.32.22484). The more stringent threshold parameter removed Sos1 from the dataset. Sos1 is involved together with Stat5a/b in most of the enriched pathways in the less stringent dataset. The (Ras-Raf-) MAPK pathway is partly regulated by Sos1, normally acting as guanin nucleotide exchange factor [upon Ras](https://doi.org/10.1083/jcb.200103146). Phosphorylation of specific Serin residues have a deactivating effect on Sos1 and it acts as negative regulator on the [whole MAPK pathway](https://doi.org/10.1042/BJ20120938), a pathway normally associated with [promoting differentiation](https://doi.org/10.1002/jcp.28334). Sos1 is also involved in the mTOR pathway, together with Akt1s1 (subunit of mTORC1), both are found in the less stringent sub network but not the more stringent one.
 
     ![mTOR-pathway with Akt1s1 (PRAS40) and Sos1 marked in pink from KEGG, entry [mmu04150](https://www.kegg.jp/pathway/mmu04150).](images/mTOR_pathway.png)
 
--   Under these biological circumstances these founds can be counted as valid and are object for further investigation, while other hits in the less stringent data set may be found as false positives. This was a very good example of the trade-of encountered by threshold settings that must be controlled thorough the data analysis.
+-   Under these biological circumstances these findings can be counted as valid and are objects for further investigations, while other hits in the less stringent data set may be found as false positives. This was a very good example of the trade-of encountered by threshold settings that must be controlled thorough the data analysis.
 
 #### Conclusion
 
 -   Many cancers involved pathways are also activated to ensure stemness in non-differentiated muscle mouse cells upon differentiation stimuli.
 -   Major targets for further investigations are JAK-STAT pathway proteins and Sos1 and Akt1s1 with the mTOR- and MAPK-pathway. Especially identification of phosphorylation sites in the protein and experiments with different differentiation inhibitors to ensure unspecific activation of stemness protecting pathways or identification of alternatively activated pathways could provide more insights.
--   Also, possibly a reproduction of the dataset with more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
+-   Also, possibly a reproduction of the dataset containing more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
+
+#### Reproducibility
+-   This project has a GitHub repository and the Rnotebook is written so that it can be executed with the downloaded repository.
 
 ------------------------------------------------------------------------
 
