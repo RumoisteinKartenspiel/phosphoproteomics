@@ -1,8 +1,6 @@
 ---
 title: "Phosphoproteomics"
-output:
-  pdf_document: default
-  html_notebook: default
+output: html_notebook
 ---
 
 ------------------------------------------------------------------------
@@ -17,7 +15,6 @@ output:
 #### Download raw data from Uppmax
 
 ```{bash}
-
 #rsync -r noahe@rackham.uppmax.uu.se:/proj/g2020004/private/student_projects/phosphoproteomics /home/noah/phosphoproteomics_project/
 ```
 
@@ -52,8 +49,8 @@ remove(RequiredPackages)
 -   Change default separator to ";"
 
 ```{r}
-raw_data_phospho <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
-raw_data_proteom <- read.csv(file = "/home/noah/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
+raw_data_phospho <- read.csv(file = "~/phosphoproteomics_project/phosphoproteomics/Dataset_Phospho.csv", sep = ";")
+raw_data_proteom <- read.csv(file = "~/phosphoproteomics_project/phosphoproteomics/Dataset_Proteome.csv", sep = ";")
 ```
 
 ------------------------------------------------------------------------
@@ -224,7 +221,7 @@ volcano_plot_proteome(raw_data_proteom) # Plots all the data
 
     a.  Remove peptides without quantitative values -\> Already done in "If loop to omit na.value from all Abundance columns" thereby creating the data_phospho
 
--   Here we use the identified thresholds from the volcano plots to clean the data. First we select rows with ratio \>= 2 and p.values \<= 0.05 from the phopho dataset. From the proteom data set values were selected with a all rows with a ratio \<= 1, all rows with a ratio \>= 1 \>= 2 and p.value \>= 0.05 (significant p-values are excluded and ratios \> bigger than 2 too). After this initial cleanup a semi_join() was performed return all rows from cleanup phospho with a match in cleanup proteome, to select only phospo values that showed increased phosphorylation due to the LIF treatment.
+-   Here we use the identified thresholds from the volcano plots to clean the data. First we select rows with ratio \>= 2 and p.values \<= 0.05 from the phopho dataset. From the proteom data set values were selected with a all rows with a ratio \<= 1, all rows with a ratio \>= 1 and p.value \<= 0.05 (elevated proteins (ratio \>=1) with significant p-values are excluded and protein with ratios bigger than 2 (disregarding p-value), too). After this initial cleanup a semi_join() was performed returning all rows from cleanup phospho with a match in cleanup proteome, to select only phospo values that showed increased phosphorylation due to the LIF treatment and not due to elevated expression levels.
 
 -   volcano plots were used to visualize the cleaning/selecting steps
 
@@ -383,14 +380,15 @@ return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
 factor_function(pathways_less)
 #Table for more stringent parameters
 factor_function(pathways_more)
+## This part does not work with STRINGdb version 11.5, it worked properly with version 11.0b
 #Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
-Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
-factor_function(Big_network_pathways_more)
+#Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
+#factor_function(Big_network_pathways_more)
 #Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 1.
-Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
-factor_function(Big_network_pathways_less)
+#Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
+#factor_function(Big_network_pathways_less)
 
-remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
+#remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
 
 ```
 
@@ -400,20 +398,24 @@ remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volc
 
 -   Stat5b was picked as the lead target since it showed the highest significant ratio after data clean up in the phospho data set.
 
--   The more stringent parameters turned out less proteins connected to Stat5b/5a but with a higher security of true association. The generated subnetwork for Stat5b showed a very promising target for further investigation, since a real network evolves around Stat5b. Generated pathways to investigate the effect of increased phosphorylation returned many cancer-related pathways indicating a connection between retaining a non-differentiated state in stem cells and the capability of cancerous cells to form cancerous masses. Of the non-cancer pathways JAK-STAT is of most importance since it's also the sub pathway affected in the cancer pathways.
+-   The more stringent parameters turned out less proteins connected to Stat5b/5a but with a higher security of true association. The generated subnetwork for Stat5b showed a very promising target for further investigation, since a network evolved around Stat5b. Generated pathways to investigate the effect of increased phosphorylation returned many cancer-related pathways indicating a connection between retaining a non-differentiated state in stem cells and the capability of cancerous cells to form cancerous masses. Of the non-cancer pathways JAK-STAT is of most importance since it's also the sub pathway affected in the cancer pathways.
 
--   The less stringent parameters turned out more proteins connected to Stat5b/5a but has a higher risk of false positive connections. In the follow up pathway analysis this turned out to be irrelevant, since major contributions to pathways are done by Stat5b/5a that are part of both data sets. This could be seen in the involved_genes section in the data tables. Stat5b forms homo- and hetero dimers especially with the paralog Stat5a. Upon Tyr-phosphorylation they dimerize and translocate into the nucleus takes place where it acts as [transcription factor](https://doi.org/10.1074/jbc.274.32.22484). The more stringent threshold parameter also removed Sos1 from the dataset. Sos1 is involved together with Stat5a/b in most of the enriched pathways in the less stringent dataset. The Ras-Raf_MAPK pathway is regulated by Sos1, normally acting as guanin nucleotide exchange factor [upon Ras](https://doi.org/10.1083/jcb.200103146). Phosphorylation of specific Serin residues have a deactivating effect on Sos1 and is used as negative regulator of the [whole Ras-Raf-MAPK pathway](https://doi.org/10.1042/BJ20120938), a pathway normally associated with [promoting differentiation](https://doi.org/10.1002/jcp.28334). Sos1 is also invovled in the mTOR pathway, together with Akt1s1 (subunit of mTORC1), both also found in the less stringent subnetwork but not the more stringent one.
+    ![JAK-STAT-pathway with Stat5a/5b, Sos1 and Ptpn11 (SHP2) in pink from KEGG, entry [mmu04630](https://www.kegg.jp/kegg-bin/show_pathway?mmu04630). ](images/jak-stat_pathway.png)
+
+-   The less stringent parameters turned out more proteins connected to Stat5b/5a but has a higher risk of false positive connections. The most important involved genes were Stat5a/b. Stat5b forms homo- and hetero dimers with the paralog Stat5a. Upon Tyr-phosphorylation they dimerize and translocation into the nucleus takes place, where it acts as [transcription factor](https://doi.org/10.1074/jbc.274.32.22484). The more stringent threshold parameter removed Sos1 from the dataset. Sos1 is involved together with Stat5a/b in most of the enriched pathways in the less stringent dataset. The (Ras-Raf-) MAPK pathway is partly regulated by Sos1, normally acting as guanin nucleotide exchange factor [upon Ras](https://doi.org/10.1083/jcb.200103146). Phosphorylation of specific Serin residues have a deactivating effect on Sos1 and it acts as negative regulator on the [whole MAPK pathway](https://doi.org/10.1042/BJ20120938), a pathway normally associated with [promoting differentiation](https://doi.org/10.1002/jcp.28334). Sos1 is also involved in the mTOR pathway, together with Akt1s1 (subunit of mTORC1), both are found in the less stringent sub network but not the more stringent one.
 
     ![mTOR-pathway with Akt1s1 (PRAS40) and Sos1 marked in pink from KEGG, entry [mmu04150](https://www.kegg.jp/pathway/mmu04150).](images/mTOR_pathway.png)
 
--   Under these biological circumstances these founds can be counted as valid and are object for further investigation, while other hits in the less stringent data set may be found as false positives. This was a very good example of the trade-of encountered by threshold settings that must be controlled thorough the data analysis.
+-   Under these biological circumstances these findings can be counted as valid and are objects for further investigations, while other hits in the less stringent data set may be found as false positives. This was a very good example of the trade-of encountered by threshold settings that must be controlled thorough the data analysis.
 
 #### Conclusion
 
 -   Many cancers involved pathways are also activated to ensure stemness in non-differentiated muscle mouse cells upon differentiation stimuli.
 -   Major targets for further investigations are JAK-STAT pathway proteins and Sos1 and Akt1s1 with the mTOR- and MAPK-pathway. Especially identification of phosphorylation sites in the protein and experiments with different differentiation inhibitors to ensure unspecific activation of stemness protecting pathways or identification of alternatively activated pathways could provide more insights.
--   Also, possibly a reproduction of the dataset with more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
+-   Also, possibly a reproduction of the dataset containing more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
 
+#### Reproducibility
+- This project has a GitHub repository and the Rnotebook is written so that it can be executed with the downloaded repository.
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
