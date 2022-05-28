@@ -380,6 +380,7 @@ return(print.data.frame(Pathway[1:5,c(11,3,4,10,7)], row.names = F))
 factor_function(pathways_less)
 #Table for more stringent parameters
 factor_function(pathways_more)
+
 ## This part does not work with STRINGdb version 11.5, it worked properly with version 11.0b
 #Identifying pathways also for Proteins with a ratio >=2 and p.value <= 0.05 and threshold = 200.
 #Big_network_pathways_more <- string_db_high$get_enrichment(hits_high$STRING_id, category = "KEGG")
@@ -388,7 +389,7 @@ factor_function(pathways_more)
 #Big_network_pathways_less <- string_db_low$get_enrichment(hits_low$STRING_id, category = "KEGG")
 #factor_function(Big_network_pathways_less)
 
-#remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
+remove(i, Link_less, Link_more, string_db_high, string_db_low, subnetworks, volcano_plot_proteome, subnetwork_less_stringent, subnetwork_more_stringent, hits_high, hits_low, data_phospho, factor_function, volcano_phospho_plot, string_db_volcano)
 
 ```
 
@@ -414,8 +415,8 @@ factor_function(pathways_more)
 -   Major targets for further investigations are JAK-STAT pathway proteins and Sos1 and Akt1s1 with the mTOR- and MAPK-pathway. Especially identification of phosphorylation sites in the protein and experiments with different differentiation inhibitors to ensure unspecific activation of stemness protecting pathways or identification of alternatively activated pathways could provide more insights.
 -   Also, possibly a reproduction of the dataset containing more samples to identify with a higher security the elevation of involved proteins and also reproduction in different cell lines to ensure that the observed effects are stemness related and not cell line related would be interesting research targets. Since the bioinformatic pipeline is in place, the analysis could be conducted quickly.
 
-#### Reproducibility
-- This project has a GitHub repository and the Rnotebook is written so that it can be executed with the downloaded repository.
+### Reproducibility
+-   This project has a [GitHub repository](https://github.com/RumoisteinKartenspiel/phosphoproteomics.git) and the Rnotebook is written so that it can be executed with the downloaded repository.
 ------------------------------------------------------------------------
 
 ------------------------------------------------------------------------
